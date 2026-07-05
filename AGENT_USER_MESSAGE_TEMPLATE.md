@@ -38,7 +38,7 @@ After the switch, you must start a new OpenCode session because existing session
 ## English: install interview
 
 ```text
-Before I install or configure `omo-model`, I need to know which existing OpenCode models you want as switchable profiles.
+Before I run install, detection, or config commands for `omo-model`, I need to know which existing OpenCode models you want as switchable profiles.
 
 Please choose one of these options:
 
@@ -48,7 +48,7 @@ Please choose one of these options:
 
 I recommend adding multiple profiles, for example one fast daily model and one stronger reasoning model. I will not print or expose your API keys, base URLs, bearer tokens, or secrets.
 
-I will first determine whether your OpenCode is running on Windows or Linux/WSL, because the config paths are different.
+After you answer, or if you do not choose a subset, I will determine whether your OpenCode is running on Windows or Linux/WSL because the config paths are different.
 ```
 
 ## English: detected models summary
@@ -133,7 +133,7 @@ Then start a new OpenCode session and rerun:
 ## Chinese: install interview
 
 ```text
-在安装或配置 `omo-model` 之前，我需要先确认：你想把哪些已经存在于 OpenCode 配置里的模型加入为可切换的 profile？
+在我运行 `omo-model` 的安装、检测或配置命令之前，我需要先确认：你想把哪些已经存在于 OpenCode 配置里的模型加入为可切换的 profile？
 
 请选择一种方式：
 
@@ -143,7 +143,7 @@ Then start a new OpenCode session and rerun:
 
 我建议至少加入多个 profile，例如一个日常快速模型，再加一个更强的推理模型。我不会打印或泄露你的 API key、base URL、bearer token 或任何密钥。
 
-我会先判断你的 OpenCode 是运行在 Windows 还是 Linux/WSL，因为它们的配置路径不同。
+你回答之后，或者如果你不指定子集，我会再判断你的 OpenCode 是运行在 Windows 还是 Linux/WSL，因为它们的配置路径不同。
 ```
 
 ## Chinese: detected models summary

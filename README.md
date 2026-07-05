@@ -49,7 +49,7 @@ bunx oh-my-openagent install
 
 ## First thing agents must ask
 
-Before installing or configuring `omo-model`, ask the user which existing OpenCode models they want exposed as `omo-model` profiles.
+Before running install, detection, or config commands, ask the user which existing OpenCode models they want exposed as `omo-model` profiles.
 
 Use this exact question unless the user already answered it:
 
@@ -63,9 +63,13 @@ If you do not specify a subset, I will scan your active OpenCode config and add 
 
 If the user answers with specific models, include only those detected models. If the user does not specify, defaults to all configured provider/model routes found in the active OpenCode config. Never invent routes. `omo-model` can only switch to routes that already exist in OpenCode config.
 
+Do this route-selection question first. After the user answers, or after they decline to choose a subset, determine whether OpenCode is running on Windows or Linux/WSL and inspect the matching config directory.
+
 ### How to detect existing models safely
 
 Agents must inspect the config without leaking secrets. Do not paste raw config into chat. Summarize only provider IDs and model IDs.
+
+When reporting detected routes or showing examples, never display raw `baseURL`, `apiKey`, `token`, `bearer`, `authorization`, `secret`, or credential values. Show only `provider-id/model-id` routes and placeholders such as `<redacted-base-url>` and `<redacted-api-key>`.
 
 Windows PowerShell:
 
@@ -321,7 +325,7 @@ For each detected route the user wants, add one object to `profiles`:
 }
 ```
 
-Use `variant: "xhigh"` and `reasoningEffort: "xhigh"` only when the user's existing route is meant to use xhigh reasoning. For normal max-style routes, use `variant: "max"` and `reasoningEffort: null`.
+Use `variant: "xhigh"` and `reasoningEffort: "xhigh"` only when the user explicitly requested xhigh reasoning or the detected route/profile name clearly contains `xhigh`. For normal max-style routes, use `variant: "max"` and `reasoningEffort: null`.
 
 Example detected routes:
 
@@ -362,16 +366,28 @@ export const profiles = [
 ];
 ```
 
-If the user did not choose a subset, add every detected route as a profile. Keep the cleanup profile only if the user needs duplicate plugin cleanup. Do not add API keys, base URLs, tokens, or provider credential fields to `omo-model-profiles.js`; it stores route names only.
+If the user did not choose a subset, add every detected route as a profile. When generating a user-specific profile list from detected routes, omit the cleanup profile unless the user specifically has duplicate plugin entries or stale plugin state. Do not add API keys, base URLs, tokens, or provider credential fields to `omo-model-profiles.js`; it stores route names only.
 
-After editing `bin/omo-model-profiles.js`, run:
+Minimum validation after customizing profiles:
 
 ```bash
 node --check bin/omo-model-profiles.js
 node ./bin/omo-model.js --list
 ```
 
-If `--list` fails because OhMyOpenAgent is not installed in the current OS account, that does not prove the profile file is invalid. `node --check` must still pass.
+`node --check bin/omo-model-profiles.js` must pass. Then run `node ./bin/omo-model.js --list` if OhMyOpenAgent is installed in this same OS account. If `--list` fails because OhMyOpenAgent is not installed in the current OS account, that does not prove the profile file is invalid.
+
+Package smoke check after install or link:
+
+```bash
+omo-model --current
+```
+
+For direct checkout usage, this equivalent smoke check is also acceptable:
+
+```bash
+node ./bin/omo-model.js --current
+```
 
 ## Commands
 
@@ -406,19 +422,20 @@ Profile `6` is special. Use it only when the user has duplicate `oh-my-opencode`
 
 Agents should follow this exact sequence when a user asks to install or switch model profiles:
 
-1. Determine whether the user is running Windows OpenCode or Linux/WSL OpenCode.
-2. Run all commands in the same OS environment where OpenCode is running.
-3. Ask which existing OpenCode provider/model routes the user wants as profiles. Recommend multiple profiles. If the user does not choose, detect and use every configured provider/model route.
+1. Before running install, detection, or config commands, ask which existing OpenCode provider/model routes the user wants as profiles. Recommend multiple profiles. If the user does not choose, plan to detect and use every configured provider/model route.
+2. Determine whether the user is running Windows OpenCode or Linux/WSL OpenCode.
+3. Run all commands in the same OS environment where OpenCode is running.
 4. Detect configured routes from `opencode.jsonc` or `opencode.json` without printing secrets.
-5. Install `omo-model` from npm or from `github:teracoot/omo-model`.
-6. Run `omo-model --current` and report the active profile, model, variant, agent count, and category count.
-7. Run `omo-model --list` and map the user's requested model/provider to a visible profile number.
-8. If the user gave a vague provider name, ask one precise question or choose only when the mapping is unambiguous from `--list`.
-9. Run `omo-model --use <number>`.
-10. Copy the backup path from the command output.
-11. Tell the user to start a new OpenCode session.
-12. After restart, verify with `omo-model --current`.
-13. If LSP or tool state matters, verify with `opencode debug lsp diagnostics <source-file> --print-logs --log-level INFO`.
+5. If the user chose a subset, include only matching detected routes. If the user did not choose, include every detected route.
+6. Install `omo-model` from npm or from `github:teracoot/omo-model`.
+7. Run `omo-model --current` and report the active profile, model, variant, agent count, and category count.
+8. Run `omo-model --list` and map the user's requested model/provider to a visible profile number.
+9. If the user gave a vague provider name, ask one precise question or choose only when the mapping is unambiguous from `--list`.
+10. Run `omo-model --use <number>`.
+11. Copy the backup path from the command output.
+12. Tell the user to start a new OpenCode session.
+13. After restart, verify with `omo-model --current`.
+14. If LSP or tool state matters, verify with `opencode debug lsp diagnostics <source-file> --print-logs --log-level INFO`.
 
 ## Required user-facing output after a switch
 
