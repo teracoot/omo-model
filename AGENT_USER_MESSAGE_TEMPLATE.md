@@ -16,6 +16,10 @@ Before replying, inspect the user's language.
 ## English: before switching
 
 ```text
+Use this block only when `omo-model` profiles already exist and the user is choosing among them. For installation, detection, or profile customization, use the "English: install interview" block first.
+
+If this task includes installing, detecting, or configuring profiles, I must first ask which existing OpenCode provider/model routes you want as `omo-model` profiles before I run any install, detection, or config command. If you do not choose a subset, I will detect and use every configured provider/model route.
+
 I will switch your OhMyOpenAgent model route with `omo-model`.
 
 First I need to confirm which OpenCode environment you are using:
@@ -44,9 +48,9 @@ Please choose one of these options:
 
 1. Tell me the exact provider/model routes you want, such as `provider-id/model-id`.
 2. Tell me the provider names you care about, and I will map them to detected models.
-3. If you do not specify anything, I will scan your active OpenCode config and add every configured provider/model route I can detect.
+3. If you reply with no subset, say to use all detected routes, decline to choose, or otherwise do not name specific routes, I will scan your active OpenCode config and add every configured provider/model route I can detect.
 
-I recommend adding multiple profiles, for example one fast daily model and one stronger reasoning model. I will not print or expose your API keys, base URLs, bearer tokens, or secrets.
+I recommend adding multiple profiles, for example one fast daily model and one stronger reasoning model. I will not print or expose raw baseURL values, API keys, tokens, bearer tokens, authorization headers, secrets, or any credential values.
 
 After you answer, or if you do not choose a subset, I will determine whether your OpenCode is running on Windows or Linux/WSL because the config paths are different.
 ```
@@ -111,6 +115,10 @@ Then start a new OpenCode session and rerun:
 ## Chinese: before switching
 
 ```text
+只有在 `omo-model` profile 已经存在、用户只是要选择切换时，才使用这一段。如果是安装、检测或自定义 profile，必须先使用下面的 “Chinese: install interview” 段落。
+
+如果这个任务包含安装、检测或配置 profile，我必须先询问你想把哪些现有 OpenCode provider/model 路由加入为 `omo-model` profile，然后才能运行任何安装、检测或配置命令。如果你不指定子集，我会检测并使用所有已经配置好的 provider/model 路由。
+
 我会用 `omo-model` 帮你切换 OhMyOpenAgent 的模型路由。
 
 我会先确认你正在使用哪个 OpenCode 环境：
@@ -139,9 +147,9 @@ Then start a new OpenCode session and rerun:
 
 1. 直接告诉我完整的 provider/model 路由，例如 `provider-id/model-id`。
 2. 告诉我你想使用哪些 provider，我会根据检测到的模型帮你匹配。
-3. 如果你不指定，我会扫描当前 OpenCode 配置，并默认把所有已经配置好的 provider/model 路由都加入为可切换 profile。
+3. 如果你回复时不指定子集、要求使用所有检测到的路由、表示不想选择，或者没有说出具体路由，我会扫描当前 OpenCode 配置，并默认把所有已经配置好的 provider/model 路由都加入为可切换 profile。
 
-我建议至少加入多个 profile，例如一个日常快速模型，再加一个更强的推理模型。我不会打印或泄露你的 API key、base URL、bearer token 或任何密钥。
+我建议至少加入多个 profile，例如一个日常快速模型，再加一个更强的推理模型。我不会打印或泄露原始 baseURL、API key、token、bearer token、authorization header、secret 或任何凭据值。
 
 你回答之后，或者如果你不指定子集，我会再判断你的 OpenCode 是运行在 Windows 还是 Linux/WSL，因为它们的配置路径不同。
 ```
