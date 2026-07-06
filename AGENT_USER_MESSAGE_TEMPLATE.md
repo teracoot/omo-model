@@ -52,7 +52,9 @@ Please choose one of these options:
 2. Tell me the provider names you care about, and I will map them to detected models.
 3. If you reply with no subset, say to use all detected routes, decline to choose, or otherwise do not name specific routes, I will scan your active OpenCode config and add every configured provider/model route I can detect.
 
-I recommend adding multiple profiles, for example one fast daily model and one stronger reasoning model. I will not print or expose raw baseURL values, API keys, tokens, bearer tokens, authorization headers, secrets, or any credential values.
+I recommend adding multiple profiles, for example one fast daily model and one stronger reasoning model. I will not print or expose raw baseURL values, API keys, tokens, bearer tokens, authorization headers, secrets, or any credential values. If I show redacted examples, I will replace whole `baseURL` values with `<redacted-base-url>`, not partial URL fragments.
+
+When I generate `bin/omo-model-profiles.js`, I will start from an empty or fully replaced `profiles` array, include only selected detected routes or all detected routes when no subset is chosen, and omit the cleanup profile unless duplicate/stale OhMy plugin state is explicitly the issue.
 
 After you answer, or if you do not choose a subset, I will determine whether your OpenCode is running on Windows or Linux/WSL because the config paths are different.
 ```
@@ -107,13 +109,13 @@ I did not change your config. Configure that provider first through the OhMyOpen
 
 Use this block only after the `omo-model` route-selection question has already been asked and handled in the same OS environment where OpenCode runs. If that has not happened, ask the install interview question first and do not run this installer yet. Do not run the installer from Windows for WSL/Linux OpenCode or from WSL/Linux for Windows OpenCode.
 
-Install OhMyOpenAgent Ultimate first:
+Install OhMyOpenAgent Ultimate only after those prerequisites are true:
 
-`bunx oh-my-openagent install`
+`[agent runs the OhMyOpenAgent installer only after route-selection and same-OS confirmation]`
 
-Then start a new OpenCode session and rerun:
+Then start a new OpenCode session and rerun the current-profile smoke check only in that same OS environment:
 
-`omo-model --current`
+`[agent runs omo-model --current only after restart in the same OS environment]`
 ```
 
 ## Chinese: existing installed profiles only
@@ -155,7 +157,9 @@ STOP: 不要把这一段用于安装、检测、设置状态检查或自定义 p
 2. 告诉我你想使用哪些 provider，我会根据检测到的模型帮你匹配。
 3. 如果你回复时不指定子集、要求使用所有检测到的路由、表示不想选择，或者没有说出具体路由，我会扫描当前 OpenCode 配置，并默认把所有已经配置好的 provider/model 路由都加入为可切换 profile。
 
-我建议至少加入多个 profile，例如一个日常快速模型，再加一个更强的推理模型。我不会打印或泄露原始 baseURL、API key、token、bearer token、authorization header、secret 或任何凭据值。
+我建议至少加入多个 profile，例如一个日常快速模型，再加一个更强的推理模型。我不会打印或泄露原始 baseURL、API key、token、bearer token、authorization header、secret 或任何凭据值。如果需要展示脱敏示例，我会把整个 `baseURL` 值替换成 `<redacted-base-url>`，不会只隐藏 URL 的一部分。
+
+生成 `bin/omo-model-profiles.js` 时，我会从空的或完全替换后的 `profiles` 数组开始，只加入你选择的已检测路由；如果你没有指定子集，就加入所有检测到的路由。除非明确是在处理重复或过期的 OhMy 插件状态，否则不会保留 cleanup profile。
 
 你回答之后，或者如果你不指定子集，我会再判断你的 OpenCode 是运行在 Windows 还是 Linux/WSL，因为它们的配置路径不同。
 ```
@@ -210,11 +214,11 @@ STOP: 不要把这一段用于安装、检测、设置状态检查或自定义 p
 
 只有在已经询问并处理过 `omo-model` 路由选择问题、而且是在 OpenCode 实际运行的同一个操作系统环境里，才使用这一段。如果还没有处理这个问题，必须先使用安装访谈段落，不要先运行安装命令。不要为了 WSL/Linux OpenCode 在 Windows 里运行安装器，也不要为了 Windows OpenCode 在 WSL/Linux 里运行安装器。
 
-请先安装 OhMyOpenAgent Ultimate：
+只有在这些前提都满足后，才安装 OhMyOpenAgent Ultimate：
 
-`bunx oh-my-openagent install`
+`[agent 只有在处理过路由选择并确认同一 OS 环境后才运行 OhMyOpenAgent 安装器]`
 
-然后重新开启 OpenCode 会话，再运行：
+然后重新开启 OpenCode 会话，并且只在同一个 OS 环境里重新运行当前 profile 检查：
 
-`omo-model --current`
+`[agent 只有在重启后、同一 OS 环境里才运行 omo-model --current]`
 ```
