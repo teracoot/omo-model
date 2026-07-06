@@ -41,9 +41,9 @@ $HOME/.config/opencode/profile-backups
 
 `omo-model` does not install OpenCode, does not install OhMyOpenAgent, does not create provider credentials, and does not invent provider config. It only switches routes in an already-working setup.
 
-If the user has not installed OhMyOpenAgent yet, do not run the installer immediately. First ask the route-selection question in the next section. After the user answers, declines to choose a subset, or asks to use all detected routes, use the normal installer.
+If the user has not installed OhMyOpenAgent yet, do not run the installer immediately. First ask the route-selection question in the next section. After the user answers, declines to choose a subset, or asks to use all detected routes, confirm the OS environment where OpenCode runs, then use the normal installer in that same OS environment.
 
-STOP: Do not run or copy the next command until the route-selection question has been asked and handled. If you have not already asked which existing OpenCode provider/model routes the user wants as `omo-model` profiles, ask that first and stop.
+STOP: Do not run or copy the next command until the route-selection question has been asked and handled and the matching OpenCode OS environment has been confirmed. Do not run it from Windows for WSL/Linux OpenCode or from WSL/Linux for Windows OpenCode. If you have not already asked which existing OpenCode provider/model routes the user wants as `omo-model` profiles, ask that first and stop.
 
 ```bash
 bunx oh-my-openagent install
@@ -107,7 +107,7 @@ If JSONC parsing fails because an obsolete model cannot run the command correctl
 
 STOP: The first action for any install, detection, profile customization, or switch task is to ask which existing OpenCode provider/model routes the user wants as `omo-model` profiles. Do not run `node`, `npm`, `bunx`, `opencode`, `omo-model`, config detection, or status commands until that question has been answered, declined, answered with use all detected routes, or already provided by the user.
 
-Prerequisite: Node.js 18 or newer and npm must be available in the same OS environment where OpenCode runs. Verify before install or link:
+Prerequisite: Node.js 18 or newer and npm must be available in the same OS environment where OpenCode runs. Run these checks only after route-selection is handled and only in the confirmed OS environment where OpenCode runs:
 
 ```bash
 node --version
@@ -152,7 +152,7 @@ npm link
 omo-model --current
 ```
 
-You can also run it directly from the checkout:
+You can also run it directly from the checkout. Do not run this status command until the route-selection question has been handled, the OpenCode OS environment has been confirmed, and the checkout is in that same OS environment/account:
 
 ```bash
 node ./bin/omo-model.js --current
@@ -368,7 +368,7 @@ For each detected route the user wants, add one object to `profiles`:
 }
 ```
 
-Use `variant: "xhigh"` and `reasoningEffort: "xhigh"` only when the user explicitly requested xhigh reasoning or the detected route/profile name clearly contains `xhigh`. For normal max-style routes, use `variant: "max"` and `reasoningEffort: null`.
+Use `variant: "xhigh"` and `reasoningEffort: "xhigh"` only when the user explicitly requested xhigh reasoning or the detected provider/model route itself, or a pre-existing detected profile name, clearly contains `xhigh`. Do not invent an xhigh profile name to justify xhigh. For normal max-style routes, use `variant: "max"` and `reasoningEffort: null`.
 
 Example detected routes:
 
@@ -409,7 +409,7 @@ export const profiles = [
 ];
 ```
 
-If the user did not choose a subset, add every detected route as a profile. When generating a user-specific profile list from detected routes, omit the cleanup profile unless the user specifically has duplicate plugin entries or stale plugin state. Do not add API keys, base URLs, tokens, or provider credential fields to `omo-model-profiles.js`; it stores route names only.
+If the user did not choose a subset, add every detected route as a profile. When generating a user-specific profile list from detected routes, omit the cleanup profile unless the user specifically has duplicate plugin entries or stale plugin state. When starting from the bundled `bin/omo-model-profiles.js`, delete the cleanup profile object from generated user-specific lists unless stale duplicate plugin state is the explicit target. Do not add API keys, base URLs, tokens, or provider credential fields to `omo-model-profiles.js`; it stores route names only.
 
 ## Validation checklist
 
@@ -439,6 +439,8 @@ node ./bin/omo-model.js --current
 ```
 
 ## Commands
+
+Reference only. Do not run any command in this table before route-selection and OS selection. For install or customization, complete safe detection and profile generation first; for switching, map the requested route to a visible profile number first.
 
 ```text
 omo-model --list           Show current route and numbered profiles
@@ -507,7 +509,7 @@ If the user prompted in Chinese, output the user-facing explanation in Chinese. 
 
 ### `Missing OhMy config`
 
-OhMyOpenAgent is not installed in the current OS environment. If and only if the route-selection question has already been asked and handled in this same OS environment, install Ultimate first:
+OhMyOpenAgent is not installed in the current OS environment. If and only if the route-selection question has already been asked and handled and this is the same OS environment where OpenCode runs, install Ultimate first:
 
 ```bash
 bunx oh-my-openagent install

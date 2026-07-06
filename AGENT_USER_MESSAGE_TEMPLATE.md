@@ -16,7 +16,7 @@ Before replying, inspect the user's language.
 ## English: before switching
 
 ```text
-Use this block only when `omo-model` profiles already exist, no installation/detection/status check for setup/profile customization is needed, and the user is choosing among existing profiles. If any installation, detection, setup status check, or profile customization is needed, do not run `omo-model --current` or `omo-model --list` yet; use the "English: install interview" block first.
+Use this block only when `omo-model` is already installed in the same OS environment where OpenCode runs, profiles already exist, no installation/detection/status check for setup/profile customization is needed, and the user is choosing among those existing profiles. Run `omo-model --current` and `omo-model --list` only for that existing-profile switch case. If there is any uncertainty, or if any installation, detection, setup status check, or profile customization is needed, do not run those status commands yet; use the "English: install interview" block first.
 
 If this task includes installing, detecting, or configuring profiles, I must first ask which existing OpenCode provider/model routes you want as `omo-model` profiles before I run any install, detection, or config command. If you do not choose a subset, I will detect and use every configured provider/model route.
 
@@ -103,7 +103,7 @@ I did not change your config. Configure that provider first through the OhMyOpen
 ```text
 `omo-model` did not find an OhMyOpenAgent config in this OS environment.
 
-Use this block only after the `omo-model` route-selection question has already been asked and handled in the same OS environment where OpenCode runs. If that has not happened, ask the install interview question first and do not run this installer yet.
+Use this block only after the `omo-model` route-selection question has already been asked and handled in the same OS environment where OpenCode runs. If that has not happened, ask the install interview question first and do not run this installer yet. Do not run the installer from Windows for WSL/Linux OpenCode or from WSL/Linux for Windows OpenCode.
 
 Install OhMyOpenAgent Ultimate first:
 
@@ -117,7 +117,7 @@ Then start a new OpenCode session and rerun:
 ## Chinese: before switching
 
 ```text
-只有在 `omo-model` profile 已经存在、不需要安装、不需要检测、不需要为了设置而运行状态检查、不需要自定义 profile，并且用户只是要选择已有 profile 切换时，才使用这一段。如果需要安装、检测、设置状态检查或自定义 profile，不要先运行 `omo-model --current` 或 `omo-model --list`，必须先使用下面的 “Chinese: install interview” 段落。
+只有在 `omo-model` 已经安装在 OpenCode 实际运行的同一个操作系统环境里、profile 已经存在、不需要安装、不需要检测、不需要为了设置而运行状态检查、不需要自定义 profile，并且用户只是要选择这些已有 profile 切换时，才使用这一段。只有这种已有 profile 切换场景才能运行 `omo-model --current` 和 `omo-model --list`。如果有任何不确定，或者需要安装、检测、设置状态检查或自定义 profile，不要先运行这些状态命令，必须先使用下面的 “Chinese: install interview” 段落。
 
 如果这个任务包含安装、检测或配置 profile，我必须先询问你想把哪些现有 OpenCode provider/model 路由加入为 `omo-model` profile，然后才能运行任何安装、检测或配置命令。如果你不指定子集，我会检测并使用所有已经配置好的 provider/model 路由。
 
@@ -204,7 +204,7 @@ Then start a new OpenCode session and rerun:
 ```text
 `omo-model` 在当前操作系统环境里没有找到 OhMyOpenAgent 配置。
 
-只有在已经询问并处理过 `omo-model` 路由选择问题、而且是在 OpenCode 实际运行的同一个操作系统环境里，才使用这一段。如果还没有处理这个问题，必须先使用安装访谈段落，不要先运行安装命令。
+只有在已经询问并处理过 `omo-model` 路由选择问题、而且是在 OpenCode 实际运行的同一个操作系统环境里，才使用这一段。如果还没有处理这个问题，必须先使用安装访谈段落，不要先运行安装命令。不要为了 WSL/Linux OpenCode 在 Windows 里运行安装器，也不要为了 Windows OpenCode 在 WSL/Linux 里运行安装器。
 
 请先安装 OhMyOpenAgent Ultimate：
 
