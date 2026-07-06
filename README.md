@@ -41,7 +41,9 @@ $HOME/.config/opencode/profile-backups
 
 `omo-model` does not install OpenCode, does not install OhMyOpenAgent, does not create provider credentials, and does not invent provider config. It only switches routes in an already-working setup.
 
-If the user has not installed OhMyOpenAgent yet, do not run the installer immediately. First ask the route-selection question in the next section. After the user answers, declines to choose a subset, or asks to use all detected routes, use the normal installer:
+If the user has not installed OhMyOpenAgent yet, do not run the installer immediately. First ask the route-selection question in the next section. After the user answers, declines to choose a subset, or asks to use all detected routes, use the normal installer.
+
+STOP: Do not run or copy the next command until the route-selection question has been asked and handled. If you have not already asked which existing OpenCode provider/model routes the user wants as `omo-model` profiles, ask that first and stop.
 
 ```bash
 bunx oh-my-openagent install
@@ -73,6 +75,8 @@ Agents must inspect the config without leaking secrets. Do not paste raw config 
 
 When reporting detected routes or showing examples, never display raw `baseURL`, `apiKey`, `token`, `bearer`, `authorization`, `secret`, or credential values. Replace the entire value of any credential-like field with a placeholder. Do not show real hostnames, URL paths, query strings, headers, partial tokens, or partial credential values. Show only `provider-id/model-id` routes and placeholders such as `<redacted-base-url>` and `<redacted-api-key>`.
 
+Run this detection block only after the route-selection question has been handled, and only when OpenCode is confirmed to run in Windows PowerShell.
+
 Windows PowerShell:
 
 ```powershell
@@ -82,6 +86,8 @@ $configPath = $candidates | ForEach-Object { Join-Path $configDir $_ } | Where-O
 if (-not $configPath) { throw "No OpenCode config found in $configDir" }
 node -e "const fs=require('fs');const p=process.argv[1];const s=fs.readFileSync(p,'utf8').replace(/\/\/.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');const j=JSON.parse(s);for(const [providerId,provider] of Object.entries(j.provider||{})){for(const modelId of Object.keys((provider&&provider.models)||{})){console.log(providerId+'/'+modelId)}}" $configPath
 ```
+
+Run this detection block only after the route-selection question has been handled, and only when OpenCode is confirmed to run in Linux or WSL.
 
 Linux or WSL shell:
 
@@ -99,7 +105,7 @@ If JSONC parsing fails because an obsolete model cannot run the command correctl
 
 ## Install
 
-Do not run any command in this section until you have asked which existing OpenCode provider/model routes the user wants as `omo-model` profiles, and the user has answered, declined to choose a subset, asked to use all detected routes, or already provided the routes.
+STOP: The first action for any install, detection, profile customization, or switch task is to ask which existing OpenCode provider/model routes the user wants as `omo-model` profiles. Do not run `node`, `npm`, `bunx`, `opencode`, `omo-model`, config detection, or status commands until that question has been answered, declined, answered with use all detected routes, or already provided by the user.
 
 Prerequisite: Node.js 18 or newer and npm must be available in the same OS environment where OpenCode runs. Verify before install or link:
 
@@ -110,7 +116,11 @@ npm --version
 
 Default for agents: if you need to customize `bin/omo-model-profiles.js` from detected routes, use a local checkout, edit that file, validate it, then run `npm link`. Use `npm install -g omo-model` only when the npm package is published and no profile customization is needed. Use `npm install -g github:teracoot/omo-model` only when the bundled profile list is sufficient.
 
+Weak-agent rule: do not run the npm or GitHub global install blocks when user-specific detected profiles are needed. Use the local checkout customization path first, then `npm link`.
+
 When published to npm, install or run it with npm tooling:
+
+Run this block only after the route-selection question has been handled, only in the same OS environment where OpenCode runs, and only when the published package already contains the desired profiles.
 
 ```bash
 npm install -g omo-model
@@ -119,6 +129,8 @@ omo-model --current
 
 Install from GitHub before npm publication:
 
+Run this block only after the route-selection question has been handled, only in the same OS environment where OpenCode runs, and only when the bundled profile list is sufficient.
+
 ```bash
 npm install -g github:teracoot/omo-model
 omo-model --current
@@ -126,9 +138,16 @@ omo-model --current
 
 For local checkout usage:
 
+Run this block only after the route-selection question, OS selection, and safe route detection are complete. Edit `bin/omo-model-profiles.js` from the selected detected routes before linking.
+
 ```bash
 git clone https://github.com/teracoot/omo-model.git
 cd omo-model
+# Before linking, edit bin/omo-model-profiles.js from the selected detected routes.
+# Include only selected detected routes, or every detected route if no subset was chosen.
+# Omit the cleanup profile unless duplicate/stale OhMy plugin state is specifically the issue.
+node --check bin/omo-model-profiles.js
+node ./bin/omo-model.js --list
 npm link
 omo-model --current
 ```
@@ -143,15 +162,20 @@ Agents should prefer the local checkout method when helping a user before npm pu
 
 ## OS and build selection
 
-After asking the required route-selection question, and after installing or linking `omo-model` if the command is not already available, determine where OpenCode is actually running. The config directory is different for Windows and WSL/Linux. Do not run these OS/build commands before that first question.
+After the required route-selection question has been handled, determine whether OpenCode is running on Windows or Linux/WSL before installing, linking, detecting routes, or running status commands. Install or link `omo-model` only inside that same OS environment. Do not install/link on Windows until Windows OpenCode is confirmed. Do not install/link in Linux/WSL until Linux/WSL OpenCode is confirmed.
 
 Only run these detection/status commands after the route-selection question has been handled. If the user has not chosen a subset, proceed with the documented default: detect and use every configured provider/model route.
 
-Run:
+Before install/link, run in the candidate OpenCode environment:
 
 ```bash
 node -p "process.platform + ' ' + process.arch"
 opencode --version
+```
+
+After install/link, or when `omo-model` is already available in the same OS environment, smoke-check with:
+
+```bash
 omo-model --current
 ```
 
@@ -159,7 +183,7 @@ omo-model --current
 
 If OpenCode is running from Windows PowerShell, run `omo-model` from Windows PowerShell too.
 
-Use the Windows npm/OpenCode build. Check the commands with:
+Use the Windows npm/OpenCode build. After install/link, or when the command is already available, check the commands with:
 
 ```powershell
 where.exe opencode
@@ -175,6 +199,8 @@ The config path is:
 
 Example switch:
 
+Run this block only after route-selection, OS selection, profile detection/customization, and `omo-model --list` mapping are complete.
+
 ```powershell
 omo-model --use 0
 ```
@@ -183,7 +209,7 @@ omo-model --use 0
 
 If OpenCode is running inside Linux or WSL, run `omo-model` inside that same Linux/WSL shell.
 
-Use the Linux npm/OpenCode build. Check the commands with:
+Use the Linux npm/OpenCode build. After install/link, or when the command is already available, check the commands with:
 
 ```bash
 command -v opencode
@@ -198,6 +224,8 @@ $HOME/.config/opencode
 ```
 
 Example switch:
+
+Run this block only after route-selection, OS selection, profile detection/customization, and `omo-model --list` mapping are complete.
 
 ```bash
 omo-model --use 0
@@ -445,20 +473,22 @@ This cleanup profile is part of the package's shipped default list only. When ge
 
 Agents should follow this exact sequence when a user asks to install or switch model profiles:
 
-1. Before running install, detection, or config commands, ask which existing OpenCode provider/model routes the user wants as profiles. Recommend multiple profiles. If the user does not choose, plan to detect and use every configured provider/model route.
-2. Determine whether the user is running Windows OpenCode or Linux/WSL OpenCode.
+1. Before running install, detection, status, or config commands, ask which existing OpenCode provider/model routes the user wants as profiles. Recommend multiple profiles. If the user does not choose, plan to detect and use every configured provider/model route.
+2. Determine whether the user is running Windows OpenCode or Linux/WSL OpenCode before running any command.
 3. Run all commands in the same OS environment where OpenCode is running.
 4. Detect configured routes from `opencode.jsonc` or `opencode.json` without printing secrets.
-5. If the user chose a subset, include only matching detected routes. If the user did not choose, include every detected route.
-6. Install `omo-model` from npm or from `github:teracoot/omo-model`.
-7. Run `omo-model --current` and report the active profile, model, variant, agent count, and category count.
-8. Run `omo-model --list` and map the user's requested model/provider to a visible profile number.
-9. If the user gave a vague provider name, ask one precise question or choose only when the mapping is unambiguous from `--list`.
-10. Run `omo-model --use <number>`.
-11. Copy the backup path from the command output.
-12. Tell the user to start a new OpenCode session.
-13. After restart, verify with `omo-model --current`.
-14. If LSP or tool state matters, verify with `opencode debug lsp diagnostics <source-file> --print-logs --log-level INFO`.
+5. Build the desired profile list from those detected routes. If the user chose a subset, include only matching detected routes. If the user did not choose, include every detected route.
+6. If the desired profile list differs from the shipped default profiles, use a local checkout, edit `bin/omo-model-profiles.js`, omit the cleanup profile unless duplicate plugin entries or stale plugin state are specifically present, and add no credentials, base URLs, or tokens.
+7. Validate the edited profile file with `node --check bin/omo-model-profiles.js` and, when OhMyOpenAgent exists in that OS account, `node ./bin/omo-model.js --list`.
+8. Link customized local profiles with `npm link` from the checkout. Use `npm install -g omo-model` or `npm install -g github:teracoot/omo-model` only when no profile customization is needed and the bundled profile list is sufficient.
+9. Run `omo-model --current` and report the active profile, model, variant, agent count, and category count.
+10. Run `omo-model --list` and map the user's requested model/provider to a visible profile number.
+11. If the user gave a vague provider name, ask one precise question or choose only when the mapping is unambiguous from `--list`.
+12. Run `omo-model --use <number>`.
+13. Copy the backup path from the command output.
+14. Tell the user to start a new OpenCode session.
+15. After restart, verify with `omo-model --current`.
+16. If LSP or tool state matters, verify with `opencode debug lsp diagnostics <source-file> --print-logs --log-level INFO`.
 
 ## Required user-facing output after a switch
 
@@ -477,7 +507,7 @@ If the user prompted in Chinese, output the user-facing explanation in Chinese. 
 
 ### `Missing OhMy config`
 
-OhMyOpenAgent is not installed in the current OS environment. Install Ultimate first:
+OhMyOpenAgent is not installed in the current OS environment. If and only if the route-selection question has already been asked and handled in this same OS environment, install Ultimate first:
 
 ```bash
 bunx oh-my-openagent install

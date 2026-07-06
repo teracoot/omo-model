@@ -16,7 +16,7 @@ Before replying, inspect the user's language.
 ## English: before switching
 
 ```text
-Use this block only when `omo-model` profiles already exist and the user is choosing among them. For installation, detection, or profile customization, use the "English: install interview" block first.
+Use this block only when `omo-model` profiles already exist, no installation/detection/status check for setup/profile customization is needed, and the user is choosing among existing profiles. If any installation, detection, setup status check, or profile customization is needed, do not run `omo-model --current` or `omo-model --list` yet; use the "English: install interview" block first.
 
 If this task includes installing, detecting, or configuring profiles, I must first ask which existing OpenCode provider/model routes you want as `omo-model` profiles before I run any install, detection, or config command. If you do not choose a subset, I will detect and use every configured provider/model route.
 
@@ -62,7 +62,7 @@ I found these configured OpenCode provider/model routes:
 
 <detected provider/model list>
 
-I did not print API keys or base URLs. If you did not request a subset, I will include all of these as `omo-model` switchable profiles. If you want only some of them, tell me the numbers or routes before I continue.
+I did not print API keys or base URLs. If you already requested a subset, I will include only the matching detected routes. If you did not request a subset before detection, I will include all detected routes as `omo-model` switchable profiles and continue without asking another open-ended model-selection question.
 ```
 
 ## English: after successful switch
@@ -103,6 +103,8 @@ I did not change your config. Configure that provider first through the OhMyOpen
 ```text
 `omo-model` did not find an OhMyOpenAgent config in this OS environment.
 
+Use this block only after the `omo-model` route-selection question has already been asked and handled in the same OS environment where OpenCode runs. If that has not happened, ask the install interview question first and do not run this installer yet.
+
 Install OhMyOpenAgent Ultimate first:
 
 `bunx oh-my-openagent install`
@@ -115,7 +117,7 @@ Then start a new OpenCode session and rerun:
 ## Chinese: before switching
 
 ```text
-只有在 `omo-model` profile 已经存在、用户只是要选择切换时，才使用这一段。如果是安装、检测或自定义 profile，必须先使用下面的 “Chinese: install interview” 段落。
+只有在 `omo-model` profile 已经存在、不需要安装、不需要检测、不需要为了设置而运行状态检查、不需要自定义 profile，并且用户只是要选择已有 profile 切换时，才使用这一段。如果需要安装、检测、设置状态检查或自定义 profile，不要先运行 `omo-model --current` 或 `omo-model --list`，必须先使用下面的 “Chinese: install interview” 段落。
 
 如果这个任务包含安装、检测或配置 profile，我必须先询问你想把哪些现有 OpenCode provider/model 路由加入为 `omo-model` profile，然后才能运行任何安装、检测或配置命令。如果你不指定子集，我会检测并使用所有已经配置好的 provider/model 路由。
 
@@ -161,7 +163,7 @@ Then start a new OpenCode session and rerun:
 
 <detected provider/model list>
 
-我没有打印 API key 或 base URL。如果你没有指定子集，我会默认把这些全部加入为 `omo-model` 可切换 profile。如果你只想加入其中一部分，请在我继续之前告诉我编号或完整路由。
+我没有打印 API key 或 base URL。如果你之前已经指定了子集，我只会加入匹配到的检测路由。如果你在检测前没有指定子集，我会默认把所有检测到的路由都加入为 `omo-model` 可切换 profile，并且不会再问第二个开放式模型选择问题。
 ```
 
 ## Chinese: after successful switch
@@ -201,6 +203,8 @@ Then start a new OpenCode session and rerun:
 
 ```text
 `omo-model` 在当前操作系统环境里没有找到 OhMyOpenAgent 配置。
+
+只有在已经询问并处理过 `omo-model` 路由选择问题、而且是在 OpenCode 实际运行的同一个操作系统环境里，才使用这一段。如果还没有处理这个问题，必须先使用安装访谈段落，不要先运行安装命令。
 
 请先安装 OhMyOpenAgent Ultimate：
 
