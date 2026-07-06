@@ -73,32 +73,30 @@ Do not ask a second open-ended model-selection question after detection. If the 
 
 Agents must inspect the config without leaking secrets. Do not paste raw config into chat. Summarize only provider IDs and model IDs.
 
-When reporting detected routes or showing examples, never display raw `baseURL`, `apiKey`, `token`, `bearer`, `authorization`, `secret`, or credential values. Replace the entire value of any credential-like field with a placeholder. Do not show real hostnames, URL paths, query strings, headers, partial tokens, or partial credential values. Show only `provider-id/model-id` routes and placeholders such as `<redacted-base-url>` and `<redacted-api-key>`.
+When reporting detected routes or showing examples, never display raw `baseURL`, `apiKey`, `token`, `bearer`, `authorization`, `secret`, or credential values. Replace the entire value of any credential-like field with a placeholder. Do not show real endpoint hostnames from `baseURL` or credential fields, URL paths, query strings, headers, partial tokens, or partial credential values. Provider IDs may look like hostnames; those are allowed only as part of detected `provider-id/model-id` routes. Show only route IDs and placeholders such as `<redacted-base-url>` and `<redacted-api-key>`.
 
-Run this detection block only after the route-selection question has been handled, and only when OpenCode is confirmed to run in Windows PowerShell.
+Run this detection block only after the route-selection question has been handled, and only when OpenCode is confirmed to run in Windows PowerShell. It uses a JSONC-aware parser from this package instead of regex comment stripping, so `https://` strings inside config values do not break detection.
 
 Windows PowerShell:
 
 ```powershell
-$configDir = Join-Path $env:USERPROFILE ".config\opencode"
-$candidates = @("opencode.jsonc", "opencode.json")
-$configPath = $candidates | ForEach-Object { Join-Path $configDir $_ } | Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
-if (-not $configPath) { throw "No OpenCode config found in $configDir" }
-node -e "const fs=require('fs');const p=process.argv[1];const s=fs.readFileSync(p,'utf8').replace(/\/\/.*$/gm,'').replace(/\/\*[\s\S]*?\*\//g,'');const j=JSON.parse(s);for(const [providerId,provider] of Object.entries(j.provider||{})){for(const modelId of Object.keys((provider&&provider.models)||{})){console.log(providerId+'/'+modelId)}}" $configPath
+# If omo-model is already installed or linked in this Windows environment:
+omo-model --routes
+
+# If using a local checkout before linking:
+node .\bin\omo-model.js --routes
 ```
 
-Run this detection block only after the route-selection question has been handled, and only when OpenCode is confirmed to run in Linux or WSL.
+Run this detection block only after the route-selection question has been handled, and only when OpenCode is confirmed to run in Linux or WSL. It uses a JSONC-aware parser from this package instead of regex comment stripping, so `https://` strings inside config values do not break detection.
 
 Linux or WSL shell:
 
 ```bash
-config_dir="$HOME/.config/opencode"
-config_path=""
-for name in opencode.jsonc opencode.json; do
-  if [ -f "$config_dir/$name" ]; then config_path="$config_dir/$name"; break; fi
-done
-test -n "$config_path" || { echo "No OpenCode config found in $config_dir" >&2; exit 1; }
-node -e 'const fs=require("fs");const p=process.argv[1];const s=fs.readFileSync(p,"utf8").replace(/\/\/.*$/gm,"").replace(/\/\*[\s\S]*?\*\//g,"");const j=JSON.parse(s);for(const [providerId,provider] of Object.entries(j.provider||{})){for(const modelId of Object.keys((provider&&provider.models)||{})){console.log(providerId+"/"+modelId)}}' "$config_path"
+# If omo-model is already installed or linked in this Linux/WSL environment:
+omo-model --routes
+
+# If using a local checkout before linking:
+node ./bin/omo-model.js --routes
 ```
 
 If JSONC parsing fails because an obsolete model cannot run the command correctly, ask the user to point to the config file, inspect only the `provider` object, and never paste or print that object raw. Before showing any excerpt, remove or replace all secret-looking fields, including `baseURL`, `apiKey`, `token`, `bearer`, `authorization`, `secret`, and credential values.
@@ -138,16 +136,32 @@ omo-model --current
 
 For local checkout usage:
 
-Run this block only after the route-selection question, OS selection, and safe route detection are complete. Edit `bin/omo-model-profiles.js` from the selected detected routes before linking.
+Run this checkout block only after the route-selection question, OS selection, and safe route detection are complete, and only in the same OS environment/account where OpenCode runs.
 
 ```bash
 git clone https://github.com/teracoot/omo-model.git
 cd omo-model
-# Before linking, edit bin/omo-model-profiles.js from the selected detected routes.
-# Include only selected detected routes, or every detected route if no subset was chosen.
-# Omit the cleanup profile unless duplicate/stale OhMy plugin state is specifically the issue.
+```
+
+STOP before running any validation, link, or status command. Edit `bin/omo-model-profiles.js` now. Start from an empty `profiles` array or replace the bundled array entirely. Include only selected detected routes, or every detected route if no subset was chosen. Omit the cleanup profile unless duplicate/stale OhMy plugin state is specifically the issue. Add no credentials, base URLs, tokens, or provider config fields.
+
+After editing profiles, validate syntax before linking:
+
+```bash
 node --check bin/omo-model-profiles.js
+```
+
+Inspect `bin/omo-model-profiles.js` directly and confirm the profile list contains only selected detected routes, or every detected route if no subset was chosen. Do not continue if it still shows bundled defaults when user-specific detected profiles are needed, if any unselected route remains, if credentials appear, or if the cleanup profile appears without an explicit stale duplicate plugin-state reason.
+
+Only when OhMyOpenAgent exists in this same OS account, also run:
+
+```bash
 node ./bin/omo-model.js --list
+```
+
+If `--list` fails only because OhMyOpenAgent is missing in the current OS account, do not treat that as profile-file invalidity. Only after `bin/omo-model-profiles.js` has been edited and validated, link and smoke-check:
+
+```bash
 npm link
 omo-model --current
 ```
@@ -409,7 +423,7 @@ export const profiles = [
 ];
 ```
 
-If the user did not choose a subset, add every detected route as a profile. When generating a user-specific profile list from detected routes, omit the cleanup profile unless the user specifically has duplicate plugin entries or stale plugin state. When starting from the bundled `bin/omo-model-profiles.js`, delete the cleanup profile object from generated user-specific lists unless stale duplicate plugin state is the explicit target. Do not add API keys, base URLs, tokens, or provider credential fields to `omo-model-profiles.js`; it stores route names only.
+If the user did not choose a subset, add every detected route as a profile. When generating a user-specific profile list from detected routes, start from an empty `profiles` array or replace the bundled array entirely; do not edit around the bundled defaults. Omit the cleanup profile unless the user specifically has duplicate plugin entries or stale plugin state. When starting from the bundled `bin/omo-model-profiles.js`, delete the cleanup profile object from generated user-specific lists unless stale duplicate plugin state is the explicit target. Do not add API keys, base URLs, tokens, or provider credential fields to `omo-model-profiles.js`; it stores route names only.
 
 ## Validation checklist
 
@@ -447,6 +461,7 @@ omo-model --list           Show current route and numbered profiles
 omo-model -l               Same as --list
 omo-model --current        Show current route only
 omo-model -c               Same as --current
+omo-model --routes         Show configured OpenCode provider/model routes
 omo-model --use <number>   Switch all OhMy agents/categories to profile number
 omo-model -u <number>      Same as --use
 omo-model --help           Show help

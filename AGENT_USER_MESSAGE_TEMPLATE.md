@@ -13,10 +13,12 @@ Before replying, inspect the user's language.
 - If the user mixed languages, prefer the language used for the direct request.
 - Keep commands unchanged unless the shell differs.
 
-## English: before switching
+## English: existing installed profiles only
+
+STOP: Do not use this block for install, detection, setup status checks, or profile customization. Use the install interview first unless route-selection has already been answered, declined, answered with use-all, or already provided by the user, the OS environment has been confirmed, `omo-model` is already installed in that same environment, and the user is choosing among existing profiles.
 
 ```text
-Use this block only when `omo-model` is already installed in the same OS environment where OpenCode runs, profiles already exist, no installation/detection/status check for setup/profile customization is needed, and the user is choosing among those existing profiles. Run `omo-model --current` and `omo-model --list` only for that existing-profile switch case. If there is any uncertainty, or if any installation, detection, setup status check, or profile customization is needed, do not run those status commands yet; use the "English: install interview" block first.
+Use this block only when route-selection has already been handled, the OpenCode OS environment has already been confirmed, `omo-model` is already installed in that same OS environment, profiles already exist, no installation/detection/status check for setup/profile customization is needed, and the user is choosing among those existing profiles. If there is any uncertainty, use the "English: install interview" block first.
 
 If this task includes installing, detecting, or configuring profiles, I must first ask which existing OpenCode provider/model routes you want as `omo-model` profiles before I run any install, detection, or config command. If you do not choose a subset, I will detect and use every configured provider/model route.
 
@@ -27,10 +29,10 @@ First I need to confirm which OpenCode environment you are using:
 1. Windows OpenCode: run commands in PowerShell and use `%USERPROFILE%\.config\opencode`.
 2. Linux/WSL OpenCode: run commands in the Linux/WSL shell and use `$HOME/.config/opencode`.
 
-I will run:
+I will verify the existing installed profiles with status commands only after the prerequisites above are true:
 
-`omo-model --current`
-`omo-model --list`
+`[agent runs omo-model --current only after route-selection and OS confirmation are already handled]`
+`[agent runs omo-model --list only after route-selection and OS confirmation are already handled]`
 
 Then I will switch to the profile you choose with:
 
@@ -114,10 +116,12 @@ Then start a new OpenCode session and rerun:
 `omo-model --current`
 ```
 
-## Chinese: before switching
+## Chinese: existing installed profiles only
+
+STOP: 不要把这一段用于安装、检测、设置状态检查或自定义 profile。除非已经处理过路由选择、已经确认 OpenCode 实际运行的操作系统环境、`omo-model` 已经安装在同一个环境里，并且用户只是要在已有 profile 之间切换，否则必须先使用安装访谈段落。
 
 ```text
-只有在 `omo-model` 已经安装在 OpenCode 实际运行的同一个操作系统环境里、profile 已经存在、不需要安装、不需要检测、不需要为了设置而运行状态检查、不需要自定义 profile，并且用户只是要选择这些已有 profile 切换时，才使用这一段。只有这种已有 profile 切换场景才能运行 `omo-model --current` 和 `omo-model --list`。如果有任何不确定，或者需要安装、检测、设置状态检查或自定义 profile，不要先运行这些状态命令，必须先使用下面的 “Chinese: install interview” 段落。
+只有在已经处理过路由选择、已经确认 OpenCode 实际运行的操作系统环境、`omo-model` 已经安装在同一个环境里、profile 已经存在、不需要安装、不需要检测、不需要为了设置而运行状态检查、不需要自定义 profile，并且用户只是要选择这些已有 profile 切换时，才使用这一段。如果有任何不确定，必须先使用下面的 “Chinese: install interview” 段落。
 
 如果这个任务包含安装、检测或配置 profile，我必须先询问你想把哪些现有 OpenCode provider/model 路由加入为 `omo-model` profile，然后才能运行任何安装、检测或配置命令。如果你不指定子集，我会检测并使用所有已经配置好的 provider/model 路由。
 
@@ -128,10 +132,10 @@ Then start a new OpenCode session and rerun:
 1. Windows OpenCode：在 PowerShell 里运行命令，配置目录是 `%USERPROFILE%\.config\opencode`。
 2. Linux/WSL OpenCode：在 Linux/WSL shell 里运行命令，配置目录是 `$HOME/.config/opencode`。
 
-我会先运行：
+只有在以上前提都满足后，我才会用状态命令确认已有 profile：
 
-`omo-model --current`
-`omo-model --list`
+`[agent 只有在已经处理路由选择并确认 OS 后才运行 omo-model --current]`
+`[agent 只有在已经处理路由选择并确认 OS 后才运行 omo-model --list]`
 
 然后用下面的命令切换到你选择的 profile：
 

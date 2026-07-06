@@ -28,6 +28,7 @@ Usage:
   omo-model -l               Same as --list
   omo-model --current        Show current route only
   omo-model -c               Same as --current
+  omo-model --routes         Show configured OpenCode provider/model routes
   omo-model --use <number>   Switch all OhMy agents/categories to profile number
   omo-model -u <number>      Same as --use
   omo-model --help           Show help
@@ -92,6 +93,19 @@ function showList() {
     console.log(`      model:   ${profile.model}`);
     console.log(`      variant: ${profile.variant}`);
   });
+}
+
+function showRoutes() {
+  const base = readConfig(resolveBaseConfig());
+  const routes = [];
+  if (isRecord(base.provider)) {
+    for (const [providerId, provider] of Object.entries(base.provider)) {
+      if (!isRecord(provider) || !isRecord(provider.models)) continue;
+      for (const modelId of Object.keys(provider.models)) routes.push(`${providerId}/${modelId}`);
+    }
+  }
+  routes.sort();
+  for (const route of routes) console.log(route);
 }
 
 function cleanBasePlugins(base, removeAllOmo) {
@@ -218,6 +232,7 @@ function main(args) {
   if (args.length === 0 || ["--help", "-h"].includes(args[0])) usage();
   else if (["--list", "-l"].includes(args[0])) showList();
   else if (["--current", "-c"].includes(args[0])) showCurrent();
+  else if (args[0] === "--routes") showRoutes();
   else if (["--use", "-u"].includes(args[0])) {
     if (args.length < 2) throw new Error("Missing profile number after --use/-u");
     switchProfile(parseProfileArg(args[1]));
