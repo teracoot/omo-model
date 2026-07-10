@@ -6,6 +6,12 @@ It is designed for agent operators who already have OpenCode and OhMyOpenAgent i
 
 This README is intentionally explicit. Some agents installing this for a user will be older models with weak memory and weak config instincts. Follow the steps literally.
 
+## Agent entry points
+
+1. **Install or use `omo-model`:** Start with [First thing agents must ask](#first-thing-agents-must-ask). STOP until route selection is handled and the OpenCode OS is confirmed. Both are mandatory before any install, detection, profile customization, status, or switch command.
+2. **Export supported active OpenCode and OhMy configuration:** Follow [Create a pack](./CONFIG_PACK_RESTORE_GUIDE.md#create-a-pack). `omo-model-pack create` reads the precedence-selected supported active OpenCode, OhMy, TUI, and DCP config artifacts and creates one standard ZIP containing a sanitized migration template. It is not a working backup, contains no credentials or endpoints, and excludes raw launchers. Do not ask the route-selection question for this read-only export.
+3. **Import or review a received archive:** Start with [Inspect before extracting](./CONFIG_PACK_RESTORE_GUIDE.md#inspect-before-extracting), then follow [Manual installation procedure for another agent](./CONFIG_PACK_RESTORE_GUIDE.md#manual-installation-procedure-for-another-agent). Inspect the ZIP, then extract it to a new review directory first. Never automatically overwrite live config or restore placeholders or credentials without the owner's approval. The route-selection exception applies only when the request is limited to `omo-model-pack create`, `omo-model-pack inspect`, or `omo-model-pack extract`; every other `omo-model` install, detection, customization, status, and switch rule remains unchanged.
+
 ## What it changes
 
 `omo-model --use <number>` changes the OhMyOpenAgent config, not the model provider itself.
