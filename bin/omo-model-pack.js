@@ -1,14 +1,15 @@
 #!/usr/bin/env node
 import { homedir } from "node:os";
+import { resolve } from "node:path";
 import { createPack, extractPack, inspectPack } from "./omo-model-pack-core.js";
 
 function usage() {
   console.log(`omo-model-pack - create a redacted OpenCode and omo-model configuration archive
 
 Usage:
-  omo-model-pack create --output <new-pack.zip>
+  omo-model-pack create --output <new-pack.zip> [--home <source-home>]
   omo-model-pack inspect <pack.zip>
-  omo-model-pack extract <pack.zip> --to <new-directory>
+  omo-model-pack extract <pack.zip> --to <new-directory> [--home <recipient-home>]
   omo-model-pack --help
 
 The archive is redacted by design: it never includes API keys, tokens,
@@ -20,10 +21,26 @@ function printSummary(label, summary) {
   for (const entry of summary.entries) console.log(`  ${entry.role}: ${entry.targetRoot}/${entry.targetPath}`);
 }
 
-function requireValue(args, option) {
-  const index = args.indexOf(option);
-  if (index < 0 || index + 1 >= args.length) throw new Error(`Missing value for ${option}`);
-  return args[index + 1];
+function parseArguments(args, allowedOptions) {
+  const options = {};
+  const positionals = [];
+  for (let index = 0; index < args.length; index += 1) {
+    const argument = args[index];
+    if (!argument.startsWith("--")) {
+      positionals.push(argument);
+      continue;
+    }
+    if (!allowedOptions.includes(argument)) throw new Error(`Unknown option '${argument}'`);
+    if (Object.hasOwn(options, argument)) throw new Error(`Duplicate option '${argument}'`);
+    if (index + 1 >= args.length || args[index + 1].startsWith("--")) throw new Error(`Missing value for ${argument}`);
+    options[argument] = args[index + 1];
+    index += 1;
+  }
+  return { options, positionals };
+}
+
+function selectedHome(options) {
+  return resolve(options["--home"] ?? process.env.HOME ?? homedir());
 }
 
 function main(args) {
@@ -32,18 +49,23 @@ function main(args) {
     return;
   }
   if (args[0] === "create") {
-    if (args.length !== 3 || args[1] !== "--output") throw new Error("Usage: omo-model-pack create --output <new-pack.zip>");
-    printSummary("Created sanitized config pack", createPack({ home: process.env.HOME || homedir(), output: requireValue(args, "--output") }));
+    const { options, positionals } = parseArguments(args.slice(1), ["--output", "--home"]);
+    if (positionals.length !== 0 || options["--output"] === undefined) throw new Error("Usage: omo-model-pack create --output <new-pack.zip> [--home <source-home>]");
+    const home = selectedHome(options);
+    console.log(`Source home: ${home}`);
+    printSummary("Created sanitized config pack", createPack({ home, output: options["--output"] }));
     return;
   }
   if (args[0] === "inspect") {
-    if (args.length !== 2) throw new Error("Usage: omo-model-pack inspect <pack.zip>");
-    printSummary("Verified config pack", inspectPack(args[1]));
+    const { options, positionals } = parseArguments(args.slice(1), []);
+    if (Object.keys(options).length !== 0 || positionals.length !== 1) throw new Error("Usage: omo-model-pack inspect <pack.zip>");
+    printSummary("Verified config pack", inspectPack(positionals[0]));
     return;
   }
   if (args[0] === "extract") {
-    if (args.length !== 4 || args[2] !== "--to") throw new Error("Usage: omo-model-pack extract <pack.zip> --to <new-directory>");
-    printSummary("Extracted sanitized config pack", extractPack({ archive: args[1], destination: requireValue(args, "--to"), home: process.env.HOME || homedir() }));
+    const { options, positionals } = parseArguments(args.slice(1), ["--to", "--home"]);
+    if (positionals.length !== 1 || options["--to"] === undefined) throw new Error("Usage: omo-model-pack extract <pack.zip> --to <new-directory> [--home <recipient-home>]");
+    printSummary("Extracted sanitized config pack", extractPack({ archive: positionals[0], destination: options["--to"], home: selectedHome(options) }));
     return;
   }
   throw new Error(`Unknown command '${args[0]}'. Run 'omo-model-pack --help'.`);

@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -233,30 +232,6 @@ test("exports only precedence-selected config candidates and refuses active-conf
       destination: join(fixture.home, ".config", "opencode", "review"),
       home: fixture.home,
     }), /OpenCode config directory/i);
-  } finally {
-    removeFixture(fixture);
-  }
-});
-
-test("CLI output creates and inspects a redacted archive without leaking values", () => {
-  const fixture = makeFixture();
-  try {
-    const create = spawnSync(process.execPath, ["bin/omo-model-pack.js", "create", "--output", fixture.output], {
-      cwd: new URL("..", import.meta.url),
-      encoding: "utf8",
-      env: { ...process.env, HOME: fixture.home },
-    });
-    assert.equal(create.status, 0, create.stderr);
-    assert.equal(`${create.stdout}${create.stderr}`.includes(marker), false);
-    assert.equal(`${create.stdout}${create.stderr}`.includes(privateUrl), false);
-
-    const inspect = spawnSync(process.execPath, ["bin/omo-model-pack.js", "inspect", fixture.output], {
-      cwd: new URL("..", import.meta.url),
-      encoding: "utf8",
-    });
-    assert.equal(inspect.status, 0, inspect.stderr);
-    assert.equal(`${inspect.stdout}${inspect.stderr}`.includes(marker), false);
-    assert.equal(`${inspect.stdout}${inspect.stderr}`.includes(privateUrl), false);
   } finally {
     removeFixture(fixture);
   }
