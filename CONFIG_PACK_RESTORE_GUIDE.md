@@ -8,68 +8,133 @@ The packer deliberately redacts API keys, access tokens, authorization and beare
 
 Treat the resulting archive as a configuration shape and routing template, **not** as a working credential backup. A recipient must obtain provider credentials and endpoint information through their own approved setup process.
 
-The packer includes only known active artifacts when they exist:
+The packer checks these file names in this exact order and exports only the first existing file from each row:
 
-- `opencode.jsonc` and `opencode.json`
-- `oh-my-openagent.jsonc`, `oh-my-openagent.json`, `oh-my-opencode.jsonc`, and `oh-my-opencode.json`
-- `tui.jsonc`, `tui.json`, `dcp.jsonc`, and `dcp.json`
+| Config family | Required? | Precedence, first to last |
+| --- | --- | --- |
+| OpenCode base | Yes | `opencode.jsonc`, `opencode.json` |
+| OhMy routing | Yes | `oh-my-openagent.jsonc`, `oh-my-openagent.json`, `oh-my-opencode.jsonc`, `oh-my-opencode.json` |
+| OpenCode TUI | No | `tui.jsonc`, `tui.json` |
+| DCP | No | `dcp.jsonc`, `dcp.json` |
 
-For each config family, it exports only the active file selected by the same precedence order used by `omo-model`; it does not bundle inactive `.json`/`.jsonc` peers. It excludes backups, logs, `node_modules`, arbitrary scripts, plugins, package metadata, launchers, and unrelated files. It never changes active OpenCode configuration, creates profile backups, or calls `omo-model --use`.
+“Active artifact” means the first existing file in one row. The packer excludes lower-precedence peers, backups, logs, `node_modules`, arbitrary scripts, plugin files, package metadata, launchers, and unrelated files. It never changes active OpenCode configuration, creates profile backups, or calls `omo-model --use`.
+
+The sanitizer keeps safe template information such as provider/model route IDs, reasoning variants, numeric model limits, and numeric concurrency settings. It removes or replaces credentials, URLs, unknown values, and unsafe keys. Do not expect every source key or value to survive, and do not require one exact placeholder spelling.
 
 ## Create a pack
 
-Run the command in the same operating-system account where OpenCode is configured. The output path must be a new `.zip` file outside `~/.config/opencode`.
+Use the checklist literally:
+
+1. Confirm whether OpenCode runs on Windows or Linux/WSL. Do not mix their home directories.
+2. Identify the exact home directory containing `.config/opencode`. Pass that directory with `--home`; do not change the shell's `HOME` variable.
+3. Choose either the **installed command** lane or the **repository checkout** lane below. Do not mix lanes.
+4. Choose a new `.zip` path whose parent directory already exists and which is outside the source home’s `.config/opencode` directory.
+5. Run `create`. Exit code `0` means success; any nonzero exit means stop.
+6. Confirm the printed `Source home:` is exactly the home selected in step 2. If it differs, discard the ZIP and stop.
+7. Run `inspect` using the matching lane. Exit code `0` means the archive is internally consistent.
+
+`--home` is the source operating-system home, not the `.config/opencode` directory itself. For a synthetic test fixture, pass the exact synthetic home supplied by the test owner. Never fall back to a real user home when a fixture path was supplied.
+
+**Windows PowerShell warning:** variable names are case-insensitive. `$home` and `$HOME` are the same built-in variable. Never assign either name in a script or test. Use the exact variable names `$sourceHome` for export and `$recipientHome` for import, as shown below, and pass them with `--home`.
 
 ### Windows PowerShell
 
+Installed command lane:
+
 ```powershell
-omo-model-pack create --output "$HOME\Desktop\my-opencode.omo-model-config-pack.zip"
+$sourceHome = [Environment]::GetFolderPath('UserProfile')
+$pack = Join-Path ([Environment]::GetFolderPath('Desktop')) 'my-opencode.omo-model-config-pack.zip'
+omo-model-pack create --home "$sourceHome" --output "$pack"
+omo-model-pack inspect "$pack"
 ```
 
-From a repository checkout instead:
+Repository checkout lane, run from the repository root:
 
 ```powershell
-node .\bin\omo-model-pack.js create --output "$HOME\Desktop\my-opencode.omo-model-config-pack.zip"
+$sourceHome = [Environment]::GetFolderPath('UserProfile')
+$pack = Join-Path ([Environment]::GetFolderPath('Desktop')) 'my-opencode.omo-model-config-pack.zip'
+node .\bin\omo-model-pack.js create --home "$sourceHome" --output "$pack"
+node .\bin\omo-model-pack.js inspect "$pack"
 ```
 
 ### Linux or WSL
 
-```bash
-omo-model-pack create --output "$HOME/Desktop/my-opencode.omo-model-config-pack.zip"
-```
-
-From a repository checkout instead:
+Installed command lane:
 
 ```bash
-node ./bin/omo-model-pack.js create --output "$HOME/Desktop/my-opencode.omo-model-config-pack.zip"
+source_home="$HOME"
+pack="$HOME/Desktop/my-opencode.omo-model-config-pack.zip"
+omo-model-pack create --home "$source_home" --output "$pack"
+omo-model-pack inspect "$pack"
 ```
 
-Send that ZIP file to the recipient. Do not send `~/.config/opencode` directly.
+Repository checkout lane, run from the repository root:
+
+```bash
+source_home="$HOME"
+pack="$HOME/Desktop/my-opencode.omo-model-config-pack.zip"
+node ./bin/omo-model-pack.js create --home "$source_home" --output "$pack"
+node ./bin/omo-model-pack.js inspect "$pack"
+```
+
+Successful `create` and `inspect` output must list logical roles and target paths only. A normal pack contains required roles `opencode-base` and `oh-my-config`, plus optional `opencode-tui` and `opencode-dcp`. Send that ZIP file to the recipient through a trusted channel. Do not send `.config/opencode` directly.
 
 ## Inspect before extracting
 
 An agent receiving a pack must inspect it before extracting or copying anything. Inspection verifies internal consistency: the manifest, file hashes, archive paths, entry count, and archive size limits without writing files. It does **not** authenticate the sender; obtain the archive through a trusted channel.
 
+Installed command:
+
 ```bash
 omo-model-pack inspect my-opencode.omo-model-config-pack.zip
 ```
 
-The output shows only logical artifact roles and target paths. It must never show raw config values, API credentials, or endpoints.
+Repository checkout, run from the repository root:
+
+```bash
+node ./bin/omo-model-pack.js inspect my-opencode.omo-model-config-pack.zip
+```
+
+The output shows only logical artifact roles and target paths such as `opencode-config/opencode.jsonc`. These are installation targets, not physical ZIP names. Physical ZIP entries live under `omo-model-config-pack/config/`, and the manifest is `omo-model-config-pack/manifest.json`. The command must never show raw config values, API credentials, or endpoints.
 
 ## Extract into a new temporary directory
 
-Extraction refuses to overwrite an existing destination. Choose a new directory whose parent already exists, outside the active config directory.
+Extraction refuses to overwrite an existing destination. Choose a new directory whose parent already exists, outside the active config directory. Pass the recipient operating-system home with `--home`; this lets the packer reject protected recipient paths. `inspect` does not use `--home`.
 
 ### Windows PowerShell
 
+Installed command lane:
+
 ```powershell
-omo-model-pack extract .\my-opencode.omo-model-config-pack.zip --to "$HOME\Desktop\opencode-pack-review"
+$recipientHome = [Environment]::GetFolderPath('UserProfile')
+$review = Join-Path ([Environment]::GetFolderPath('Desktop')) 'opencode-pack-review'
+omo-model-pack extract .\my-opencode.omo-model-config-pack.zip --home "$recipientHome" --to "$review"
+```
+
+Repository checkout lane, run from the repository root:
+
+```powershell
+$recipientHome = [Environment]::GetFolderPath('UserProfile')
+$review = Join-Path ([Environment]::GetFolderPath('Desktop')) 'opencode-pack-review'
+node .\bin\omo-model-pack.js extract .\my-opencode.omo-model-config-pack.zip --home "$recipientHome" --to "$review"
 ```
 
 ### Linux or WSL
 
+Installed command lane:
+
 ```bash
-omo-model-pack extract ./my-opencode.omo-model-config-pack.zip --to "$HOME/Desktop/opencode-pack-review"
+recipient_home="$HOME"
+review="$HOME/Desktop/opencode-pack-review"
+omo-model-pack extract ./my-opencode.omo-model-config-pack.zip --home "$recipient_home" --to "$review"
+```
+
+Repository checkout lane, run from the repository root:
+
+```bash
+recipient_home="$HOME"
+review="$HOME/Desktop/opencode-pack-review"
+node ./bin/omo-model-pack.js extract ./my-opencode.omo-model-config-pack.zip --home "$recipient_home" --to "$review"
 ```
 
 The extracted layout is:
@@ -82,18 +147,145 @@ opencode-pack-review/
 
 ## Manual installation procedure for another agent
 
-Do **not** automatically copy extracted files into a live configuration directory. Follow these steps only after the owner explicitly approves the exact files to merge or replace.
+There is intentionally no automatic import command. A generic automatic merge cannot know which recipient credentials, endpoints, plugins, paths, or routes are authorized. Follow these phases literally.
 
-1. Confirm the target operating system where OpenCode actually runs. Do not mix Windows and WSL/Linux homes.
-2. Inspect `manifest.json` and the extracted files. Confirm that they are redacted templates and that the intended provider/model routes are appropriate.
-3. Back up each destination file before an approved merge or replacement. Use a timestamped copy in a directory outside the active config root.
-4. Merge the exported structure with the recipient's existing config. Preserve the recipient's current credentials, provider URLs, local plugin paths, and machine-specific settings. Never copy a `<redacted-secret>` or `<redacted-url>` placeholder into a working provider configuration.
-5. Copy a config artifact only after approval into the platform's active config root:
-   - Windows: `%USERPROFILE%\.config\opencode`
-   - Linux or WSL: `$HOME/.config/opencode`
-6. Install or update `omo-model` separately from the trusted repository/package source if the recipient needs its launcher; the pack intentionally never includes executable launcher files.
-7. Restart OpenCode after any config-time file change. OpenCode reads configuration at startup.
-8. After the user has completed the authorized setup, run only a read-only check such as `omo-model --current`. Do not run `omo-model --use <number>` unless the user separately asks to change the active route.
+### Phase A — review only, no approval required
+
+1. Confirm the operating system where the recipient’s OpenCode runs. Never mix Windows and WSL/Linux homes.
+2. Run `inspect`, then extract into a new review directory using one complete installed or checkout command lane above.
+3. Read `manifest.json` and compare the extracted templates with the recipient config locally. Never paste either config into chat.
+4. Make a merge plan with one row per artifact: pack role, extracted filename, recipient destination, keys proposed for import, recipient keys that must stay unchanged, and blockers.
+5. Stop and show the owner only route IDs, filenames, and the merge plan. Do not create backups or modify active config yet.
+
+### Phase B — obtain exact approval
+
+The owner must approve all three items before any write:
+
+1. The exact destination files.
+2. The exact keys/routes to import.
+3. Whether each destination is a merge or a replacement. Default to **merge**. Replacement is forbidden unless the owner explicitly says “replace” for that exact file.
+
+If approval is incomplete, stop. Approval to inspect or extract is not approval to install.
+
+### Phase C — create rollback backups
+
+Back up only the approved destination files, before changing any of them. The backup directory must be outside the active config root. Keep a `backup-map.tsv` that maps each destination to its backup. If a destination does not exist, record `NEW_FILE` so rollback knows to remove it.
+
+Windows PowerShell:
+
+```powershell
+$recipientHome = [Environment]::GetFolderPath('UserProfile')
+$configRoot = Join-Path $recipientHome '.config\opencode'
+$stamp = Get-Date -Format 'yyyyMMdd-HHmmss-fff'
+$backupRoot = Join-Path $recipientHome ".config\opencode-import-backups\$stamp"
+New-Item -ItemType Directory -Path $backupRoot -Force | Out-Null
+
+# Replace this example list with only the exact destination files the owner approved.
+$destinations = @(
+  (Join-Path $configRoot 'opencode.jsonc'),
+  (Join-Path $configRoot 'oh-my-openagent.json')
+)
+
+foreach ($destination in $destinations) {
+  if (Test-Path -LiteralPath $destination -PathType Leaf) {
+    $backup = Join-Path $backupRoot ([IO.Path]::GetFileName($destination))
+    Copy-Item -LiteralPath $destination -Destination $backup
+    "$destination`t$backup" | Add-Content -LiteralPath (Join-Path $backupRoot 'backup-map.tsv')
+  } else {
+    "$destination`tNEW_FILE" | Add-Content -LiteralPath (Join-Path $backupRoot 'backup-map.tsv')
+  }
+}
+```
+
+Linux or WSL:
+
+```bash
+recipient_home="$HOME"
+config_root="$recipient_home/.config/opencode"
+stamp="$(date +%Y%m%d-%H%M%S)"
+backup_root="$recipient_home/.config/opencode-import-backups/$stamp"
+mkdir -p "$backup_root"
+
+# Replace this example list with only the exact destination files the owner approved.
+destinations=("$config_root/opencode.jsonc" "$config_root/oh-my-openagent.json")
+for destination in "${destinations[@]}"; do
+  if [ -f "$destination" ]; then
+    backup="$backup_root/$(basename "$destination")"
+    cp -- "$destination" "$backup"
+    printf '%s\t%s\n' "$destination" "$backup" >> "$backup_root/backup-map.tsv"
+  else
+    printf '%s\tNEW_FILE\n' "$destination" >> "$backup_root/backup-map.tsv"
+  fi
+done
+```
+
+### Phase D — merge approved template fields
+
+Apply these rules in order:
+
+1. Use the recipient’s currently active filename for each family according to the precedence table above. Do not create a higher-precedence peer accidentally. If the recipient has no file for a family, ask the owner which filename to create.
+2. Never copy a key named like `<redacted-key-N>` or a value beginning with `<redacted-`. Never copy sender credentials, provider URLs, authorization headers, plugin paths, MCP settings, shell paths, LSP paths, or other machine-specific values.
+3. **OpenCode base:** preserve the recipient’s `options`, `apiKey`, `baseURL`, `headers`, `plugin`, `mcp`, `shell`, `lsp`, and path settings. Import only owner-approved provider/model structure. A provider route is unusable until the recipient configures its own credential and endpoint through an authorized provider setup workflow.
+4. **OhMy routing:** import only owner-approved `agents`, `categories`, reasoning variants, and numeric concurrency entries. Before importing a route, confirm that exact `provider/model` route exists in the recipient OpenCode base config.
+5. **TUI and DCP:** skip by default because they are machine-specific. Merge only exact keys the owner separately approved.
+6. Preserve JSONC comments when editing an existing `.jsonc` file. Do not convert a recipient `.jsonc` file to `.json` merely because the pack used `.json`.
+7. Full-file replacement remains forbidden unless the owner approved replacement for that exact destination after reviewing the redacted template and supplying every required recipient-owned value.
+8. If you cannot perform a field-level merge while preserving every unapproved recipient field, stop and ask for a more capable operator. Never replace the whole file as a shortcut.
+
+### Phase E — validate, restart, or roll back
+
+After the approved edits, but before declaring success:
+
+1. Search the destination files locally for `<redacted-`. Report only filenames and counts. If any placeholder remains, validation fails.
+2. Run `opencode debug config` with its output suppressed. A nonzero exit means validation fails. Use `opencode debug config *> $null` in Windows PowerShell or `opencode debug config >/dev/null` in Linux/WSL.
+3. Run `opencode models` and confirm every newly approved route is present.
+4. Run `opencode agent list` when agent/category routing changed.
+5. Restart OpenCode because config-time files are loaded at startup.
+6. If `omo-model` is installed, run `omo-model --current` as a read-only route check. Never run `omo-model --use <number>` unless the owner separately requests a route change.
+
+If any validation step fails, close OpenCode and roll back immediately using `backup-map.tsv`:
+
+1. For each `destination<TAB>backup` row, copy the backup over the destination.
+2. For each `destination<TAB>NEW_FILE` row, remove only that newly created destination.
+3. Before launching the UI, run `opencode debug config` with output suppressed and run `opencode models`. If either fails, stop and keep the backups.
+4. Restart OpenCode only after those checks pass.
+5. After restart, repeat any applicable `opencode agent list` and `omo-model --current` checks.
+6. Keep the backup directory until the owner confirms the recovered setup works. Never delete backups merely because rollback succeeded.
+
+Windows PowerShell rollback, after setting `$backupRoot` to the exact Phase C directory:
+
+```powershell
+$map = Join-Path $backupRoot 'backup-map.tsv'
+foreach ($row in Get-Content -LiteralPath $map) {
+  $destination, $backup = $row -split "`t", 2
+  if ($backup -eq 'NEW_FILE') {
+    if (Test-Path -LiteralPath $destination -PathType Leaf) {
+      Remove-Item -LiteralPath $destination
+    }
+  } else {
+    Copy-Item -LiteralPath $backup -Destination $destination -Force
+  }
+}
+opencode debug config *> $null
+if ($LASTEXITCODE -ne 0) { throw 'Rollback validation failed' }
+opencode models
+```
+
+Linux or WSL rollback, after setting `backup_root` to the exact Phase C directory:
+
+```bash
+while IFS=$'\t' read -r destination backup; do
+  if [ "$backup" = "NEW_FILE" ]; then
+    rm -f -- "$destination"
+  else
+    cp -- "$backup" "$destination"
+  fi
+done < "$backup_root/backup-map.tsv"
+opencode debug config >/dev/null
+opencode models
+```
+
+After either rollback block succeeds, restart OpenCode and repeat any applicable `opencode agent list` and `omo-model --current` checks.
 
 ## Required agent behavior
 
