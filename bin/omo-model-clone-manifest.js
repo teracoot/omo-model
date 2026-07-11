@@ -31,7 +31,7 @@ export function validateCloneManifest(manifest, index) {
     const entry = index.get(descriptor.archivePath);
     if (entry === undefined || entry.data.length !== descriptor.bytes || hash(entry.data) !== descriptor.sha256) throw new Error("Archive hash or checksum mismatch");
   }
-  for (const role of ["opencode-base", "oh-my-config", "launcher-powershell", "launcher-command", "security-warning", "handoff-zh-cn", "restore-windows", "clone-validator"]) if (!roles.has(role)) throw new Error("Archive manifest is missing a required role");
+  for (const role of ["opencode-base", "oh-my-config", "launcher-powershell", "launcher-command", "security-warning", "handoff-zh-cn", "manual-install-guide"]) if (!roles.has(role)) throw new Error("Archive manifest is missing a required role");
   if (expected.size !== index.size || [...index.keys()].some((path) => !expected.has(path))) throw new Error("Archive contains an unmanifested entry or noncanonical layout");
   const canonical = [...expected].sort();
   const actual = [...index.keys()].sort();

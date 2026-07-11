@@ -6,7 +6,7 @@ import { createClone, extractClone, inspectClone } from "../bin/omo-model-clone-
 import { readZip } from "../bin/omo-model-pack-zip.js";
 import { makeCloneFixture, removeCloneFixture, SECRET } from "./omo-model-clone-fixture.js";
 
-test("Given a synthetic Windows home, create preserves exact active bytes and excludes unrelated files", () => {
+test("Given a synthetic Windows home, create preserves exact raw payloads and only static root assets", () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
@@ -16,25 +16,31 @@ test("Given a synthetic Windows home, create preserves exact active bytes and ex
     assert.deepEqual(entries.get("omo-model-clone/config/oh-my-openagent.json"), fixture.ohmy);
     assert.equal(entries.get("omo-model-clone/launchers/omo-model.ps1").includes(SECRET), true);
     assert.equal([...entries.keys()].some((path) => /opencode\.json$|backup|package|node_modules/.test(path)), false);
-    assert.equal(entries.has("omo-model-clone/SECURITY-WARNING.txt"), true);
-    assert.equal(entries.has("omo-model-clone/HANDOFF-ZH-CN.txt"), true);
-    assert.equal(entries.has("omo-model-clone/restore-windows.ps1"), true);
+    const rootAssets = [...entries.keys()].filter((path) => path.startsWith("omo-model-clone/") && !path.includes("/config/") && !path.includes("/launchers/") && !path.endsWith("/manifest.json"));
+    assert.deepEqual(rootAssets.sort(), [
+      "omo-model-clone/HANDOFF-ZH-CN.txt",
+      "omo-model-clone/MANUAL-INSTALL.md",
+      "omo-model-clone/SECURITY-WARNING.txt",
+    ]);
+    assert.equal(rootAssets.some((path) => /\.(?:cmd|exe|js|mjs|ps1)$/i.test(path)), false);
   } finally {
     removeCloneFixture(fixture);
   }
 });
 
-test("Given an exact clone, inspect verifies a closed manifest and extract writes a canonical review tree", () => {
+test("Given a v2 exact clone, inspect verifies a closed manifest and extract writes only a review tree", () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
     const summary = inspectClone(fixture.archive);
     assert.equal(summary.format, "omo-model-clone");
-    assert.equal(summary.version, 1);
+    assert.equal(summary.version, 2);
     assert.equal(summary.entries >= 7, true);
     extractClone({ archive: fixture.archive, destination: fixture.extracted, home: fixture.recipient });
     assert.deepEqual(readFileSync(join(fixture.extracted, "config", "opencode.jsonc")), fixture.base);
     assert.equal(existsSync(join(fixture.extracted, "manifest.json")), true);
+    assert.equal(existsSync(join(fixture.recipient, ".config", "opencode")), false);
+    assert.equal(existsSync(join(fixture.recipient, ".local", "bin")), false);
   } finally {
     removeCloneFixture(fixture);
   }

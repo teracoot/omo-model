@@ -1,6 +1,6 @@
 export const CLONE_ROOT = "omo-model-clone";
 export const CLONE_FORMAT = "omo-model-clone";
-export const CLONE_VERSION = 1;
+export const CLONE_VERSION = 2;
 
 export const CLONE_ARTIFACTS = [
   { candidates: ["opencode.jsonc", "opencode.json"], required: true, role: "opencode-base", root: "config" },
@@ -14,8 +14,7 @@ export const CLONE_ARTIFACTS = [
 export const HELPER_ASSETS = [
   { archivePath: `${CLONE_ROOT}/SECURITY-WARNING.txt`, role: "security-warning", targetPath: "SECURITY-WARNING.txt", targetRoot: "clone-root" },
   { archivePath: `${CLONE_ROOT}/HANDOFF-ZH-CN.txt`, role: "handoff-zh-cn", targetPath: "HANDOFF-ZH-CN.txt", targetRoot: "clone-root" },
-  { archivePath: `${CLONE_ROOT}/restore-windows.ps1`, role: "restore-windows", targetPath: "restore-windows.ps1", targetRoot: "clone-root" },
-  { archivePath: `${CLONE_ROOT}/validate-clone.mjs`, role: "clone-validator", targetPath: "validate-clone.mjs", targetRoot: "clone-root" },
+  { archivePath: `${CLONE_ROOT}/MANUAL-INSTALL.md`, role: "manual-install-guide", targetPath: "MANUAL-INSTALL.md", targetRoot: "clone-root" },
 ];
 
 export function approvedDescriptor(descriptor) {

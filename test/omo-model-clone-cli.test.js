@@ -41,6 +41,8 @@ test("Given either help spelling, CLI exits successfully before filesystem acces
     const result = run([flag]);
     assert.equal(result.status, 0, result.stderr);
     assert.match(result.stdout, /omo-model-clone/);
+    assert.match(result.stdout, /MANUAL_INSTALL|manual/i);
+    assert.doesNotMatch(result.stdout, /restore/i);
   }
 });
 

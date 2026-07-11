@@ -49,7 +49,7 @@ function parse(args, spec) {
 function requireFlags(parsed, spec) { for (const flag of spec.booleans) if (!parsed.flags.has(flag)) throw new Error(`Missing required acknowledgement '${flag}'`); }
 function requireAbsolute(value, label) { if (!isAbsolute(value)) throw new Error(`${label} must be absolute`); }
 function print(action, summary) { console.log(`SECURITY WARNING: UNENCRYPTED archive intentionally contains SECRETS.\n${action} ${summary.format} v${summary.version}; ${summary.entries} entries.`); }
-function usage() { console.log("omo-model-clone create|inspect|extract: see EXACT_CLONE_RESTORE_GUIDE.md. Archives are intentionally UNENCRYPTED and contain SECRETS."); }
+function usage() { console.log("omo-model-clone create|inspect|extract: see EXACT_CLONE_MANUAL_INSTALL_GUIDE.md. Archives are intentionally UNENCRYPTED and contain SECRETS; placement is manual only."); }
 
 const argumentsList = process.argv.slice(2);
 try { main(argumentsList); }
