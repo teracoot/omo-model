@@ -24,7 +24,11 @@ export function resolveConfig(configDir, candidates, label) {
 }
 
 export function readConfig(file) {
-  return JSON.parse(stripJsonc(readFileSync(file, "utf8").replace(/^\uFEFF+/, "")));
+  return parseJsoncBuffer(readFileSync(file));
+}
+
+export function parseJsoncBuffer(buffer) {
+  return JSON.parse(stripJsonc(Buffer.from(buffer).toString("utf8").replace(/^\uFEFF+/, "")));
 }
 
 export function writeConfig(file, value) {

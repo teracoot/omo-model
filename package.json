@@ -1,17 +1,19 @@
 {
   "name": "omo-model",
   "version": "1.0.0",
-  "description": "Switch OhMyOpenAgent model routes and create redacted configuration packs.",
+  "description": "Switch OhMyOpenAgent model routes and create redacted or exact configuration packs.",
   "type": "module",
   "bin": {
     "omo-model": "bin/omo-model.js",
-    "omo-model-pack": "bin/omo-model-pack.js"
+    "omo-model-pack": "bin/omo-model-pack.js",
+    "omo-model-clone": "bin/omo-model-clone.js"
   },
   "files": [
     "bin",
     "README.md",
     "AGENT_USER_MESSAGE_TEMPLATE.md",
-    "CONFIG_PACK_RESTORE_GUIDE.md"
+    "CONFIG_PACK_RESTORE_GUIDE.md",
+    "EXACT_CLONE_RESTORE_GUIDE.md"
   ],
   "scripts": {
     "test": "node --test"
