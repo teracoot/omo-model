@@ -480,24 +480,21 @@ omo-model --help           Show help
 
 ## Included profiles
 
-The current profile list is:
+Profile numbers are always sequential `0..N-1` in list order. Both the installed PowerShell `omo-model.ps1` and package `bin/omo-model-profiles.js` renumber automatically when entries are added or removed — do not maintain sparse/manual IDs.
 
-| Number | Name | Purpose |
-| --- | --- | --- |
-| `0` | `TSNUI GPT-5.5 xhigh` | Route everything to `ai.tsnui.com/gpt-5.5` with xhigh reasoning. |
-| `1` | `Feiyuan GPT-5.5 xhigh` | Route everything to `feiyuan:manual:openai/gpt-5.5-xhigh`. |
-| `2` | `PQAPI GPT-5.5 xhigh` | Route everything to `www.pqapi.space/gpt-5.5`. |
-| `3` | `Feiyuan Claude Opus 4.8 Max` | Route everything to `feiyuan:manual:anthropic/claude-opus-4-8-max`. |
-| `4` | `bxcv.store Claude Fable 5 Max` | Route everything to `bxcv.store/claude-fable-5-max`. |
-| `5` | `bxcv.store Claude Opus 4.8 Max` | Route everything to `bxcv.store/claude-opus-4-8-max`. |
-| `6` | `Clear duplicate OMO plugin from opencode.json` | Cleanup profile, not a model route. |
-| `7` | `opus-free` | Route everything to `opus-free/opus-free`. |
+| Number | Name | Route | Variant / effort |
+| --- | --- | --- | --- |
+| `0` | `TSNUI GPT-5.5 xhigh` | `ai.tsnui.com/gpt-5.5` | `xhigh` |
+| `1` | `PQAPI GPT-5.6 Terra Max` | `www.pqapi.space/gpt-5.6-terra` | `max` |
+| `2` | `Clear duplicate OMO plugin from opencode.json` | cleanup only | n/a |
+| `3` | `Claude Free` | `claude-free/claude-free` | `max` |
+| `4` | `TSNUI GPT-5.6 Sol High` | `ai.tsnui.com/gpt-5.6-sol` | `high` |
+| `5` | `TSNUI GPT-5.6 Sol XHigh` | `ai.tsnui.com/gpt-5.6-sol` | `xhigh` |
+| `6` | `TSNUI GPT-5.6 Sol Max` | `ai.tsnui.com/gpt-5.6-sol` | `max` |
+| `7` | `PQAPI GPT-5.5 XHigh` | `www.pqapi.space/gpt-5.5` | `xhigh` |
+| `8` | `Grok 4.5 High` | `grok:oracle:sub2api/grok-4.5` | `high` |
 
-The bundled `xhigh` entries are package defaults only. They are not examples for generated user-specific profile names or `xhigh` selection. When generating profiles from detected routes, still use `xhigh` only when the user explicitly requested it or the detected route/profile name clearly contains `xhigh`; otherwise use `variant: "max"` and `reasoningEffort: null`.
-
-Profile `6` is special. Use it only when the user has duplicate `oh-my-opencode` / `oh-my-openagent` plugin entries or stale `opencode.json` plugin state. It does not switch model routes.
-
-This cleanup profile is part of the package's shipped default list only. When generating a user-specific profile list from detected routes, do not keep or recreate this cleanup profile unless the user specifically has duplicate plugin entries or stale plugin state.
+Grok defaults to `reasoningEffort: "high"` (not `max`). OpenCode limits for Grok 4.5 are context `500000`, input `500000`, output `128000`, with image attachment enabled.
 
 ## Agent procedure
 
@@ -558,7 +555,7 @@ You changed the wrong config. Run `omo-model` in the same OS environment where O
 
 - Do not print API keys or provider tokens.
 - Do not edit provider credentials unless the user explicitly asks.
-- Do not run cleanup profile `6` unless duplicate OMO plugin entries are the problem.
+- Do not run the cleanup profile (`[2]` in the current sequential list) unless duplicate OMO plugin entries are the problem.
 - Always report the backup path.
 - Always remind the user to restart OpenCode after switching.
 - Use Chinese user-facing output when the user's prompt is in Chinese.
