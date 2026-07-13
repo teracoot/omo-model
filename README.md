@@ -485,13 +485,13 @@ Profile numbers are always sequential `0..N-1` in list order. Both the installed
 | Number | Name | Route | Variant / effort |
 | --- | --- | --- | --- |
 | `0` | `TSNUI GPT-5.5 xhigh` | `ai.tsnui.com/gpt-5.5` | `xhigh` |
-| `1` | `PQAPI GPT-5.6 Terra Max` | `www.pqapi.space/gpt-5.6-terra` | `max` |
-| `2` | `Clear duplicate OMO plugin from opencode.json` | cleanup only | n/a |
-| `3` | `Claude Free` | `claude-free/claude-free` | `max` |
-| `4` | `TSNUI GPT-5.6 Sol High` | `ai.tsnui.com/gpt-5.6-sol` | `high` |
-| `5` | `TSNUI GPT-5.6 Sol XHigh` | `ai.tsnui.com/gpt-5.6-sol` | `xhigh` |
-| `6` | `TSNUI GPT-5.6 Sol Max` | `ai.tsnui.com/gpt-5.6-sol` | `max` |
-| `7` | `PQAPI GPT-5.5 XHigh` | `www.pqapi.space/gpt-5.5` | `xhigh` |
+| `1` | `TSNUI GPT-5.6 Sol Medium` | `ai.tsnui.com/gpt-5.6-sol` | `medium` |
+| `2` | `TSNUI GPT-5.6 Sol High` | `ai.tsnui.com/gpt-5.6-sol` | `high` |
+| `3` | `TSNUI GPT-5.6 Sol XHigh` | `ai.tsnui.com/gpt-5.6-sol` | `xhigh` |
+| `4` | `TSNUI GPT-5.6 Sol Max` | `ai.tsnui.com/gpt-5.6-sol` | `max` |
+| `5` | `PQAPI GPT-5.6 Terra Max` | `www.pqapi.space/gpt-5.6-terra` | `max` |
+| `6` | `PQAPI GPT-5.5 XHigh` | `www.pqapi.space/gpt-5.5` | `xhigh` |
+| `7` | `Claude Free` | `claude-free/claude-free` | `max` |
 | `8` | `Grok 4.5 High` | `grok:oracle:sub2api/grok-4.5` | `high` |
 
 Grok defaults to `reasoningEffort: "high"` (not `max`). OpenCode limits for Grok 4.5 are context `500000`, input `500000`, output `128000`, with image attachment enabled.
@@ -555,7 +555,7 @@ You changed the wrong config. Run `omo-model` in the same OS environment where O
 
 - Do not print API keys or provider tokens.
 - Do not edit provider credentials unless the user explicitly asks.
-- Do not run the cleanup profile (`[2]` in the current sequential list) unless duplicate OMO plugin entries are the problem.
+- The bundled profile list has no cleanup/disable-plugin entry. Do not invent one unless the user explicitly needs duplicate OMO plugin cleanup.
 - Always report the backup path.
 - Always remind the user to restart OpenCode after switching.
 - Use Chinese user-facing output when the user's prompt is in Chinese.

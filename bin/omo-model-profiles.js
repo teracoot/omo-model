@@ -1,4 +1,5 @@
 export const profiles = [
+  // TSNUI group
   {
     name: "TSNUI GPT-5.5 xhigh",
     model: "ai.tsnui.com/gpt-5.5",
@@ -8,29 +9,12 @@ export const profiles = [
     modelConcurrency: "ai.tsnui.com/gpt-5.5",
   },
   {
-    name: "PQAPI GPT-5.6 Terra Max",
-    model: "www.pqapi.space/gpt-5.6-terra",
-    variant: "max",
-    reasoningEffort: "max",
-    providerConcurrency: "www.pqapi.space",
-    modelConcurrency: "www.pqapi.space/gpt-5.6-terra",
-  },
-  {
-    name: "Clear duplicate OMO plugin from opencode.json",
-    model: null,
-    variant: null,
-    reasoningEffort: null,
-    providerConcurrency: null,
-    modelConcurrency: null,
-    disableOhMyPlugin: true,
-  },
-  {
-    name: "Claude Free",
-    model: "claude-free/claude-free",
-    variant: "max",
-    reasoningEffort: null,
-    providerConcurrency: "claude-free",
-    modelConcurrency: "claude-free/claude-free",
+    name: "TSNUI GPT-5.6 Sol Medium",
+    model: "ai.tsnui.com/gpt-5.6-sol",
+    variant: "medium",
+    reasoningEffort: "medium",
+    providerConcurrency: "ai.tsnui.com",
+    modelConcurrency: "ai.tsnui.com/gpt-5.6-sol",
   },
   {
     name: "TSNUI GPT-5.6 Sol High",
@@ -56,6 +40,15 @@ export const profiles = [
     providerConcurrency: "ai.tsnui.com",
     modelConcurrency: "ai.tsnui.com/gpt-5.6-sol",
   },
+  // PQAPI group
+  {
+    name: "PQAPI GPT-5.6 Terra Max",
+    model: "www.pqapi.space/gpt-5.6-terra",
+    variant: "max",
+    reasoningEffort: "max",
+    providerConcurrency: "www.pqapi.space",
+    modelConcurrency: "www.pqapi.space/gpt-5.6-terra",
+  },
   {
     name: "PQAPI GPT-5.5 XHigh",
     model: "www.pqapi.space/gpt-5.5",
@@ -63,6 +56,15 @@ export const profiles = [
     reasoningEffort: "xhigh",
     providerConcurrency: "www.pqapi.space",
     modelConcurrency: "www.pqapi.space/gpt-5.5",
+  },
+  // Other routes
+  {
+    name: "Claude Free",
+    model: "claude-free/claude-free",
+    variant: "max",
+    reasoningEffort: null,
+    providerConcurrency: "claude-free",
+    modelConcurrency: "claude-free/claude-free",
   },
   {
     name: "Grok 4.5 High",
