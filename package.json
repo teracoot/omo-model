@@ -1,7 +1,7 @@
 {
   "name": "omo-model",
-  "version": "1.0.0",
-  "description": "Switch OhMyOpenAgent model routes and create redacted or exact configuration packs.",
+  "version": "1.1.0",
+  "description": "Switch OpenCode and OhMy model routes and create redacted or exact configuration packs.",
   "type": "module",
   "bin": {
     "omo-model": "bin/omo-model.js",
@@ -11,12 +11,19 @@
   "files": [
     "bin",
     "README.md",
+    "CHANGELOG.md",
+    "RELEASING.md",
     "AGENT_USER_MESSAGE_TEMPLATE.md",
     "CONFIG_PACK_RESTORE_GUIDE.md",
     "EXACT_CLONE_MANUAL_INSTALL_GUIDE.md"
   ],
   "scripts": {
-    "test": "node --test"
+    "check": "npm run check:syntax && npm test && npm run check:package && npm run check:release",
+    "check:package": "node scripts/check-package.js",
+    "check:release": "node scripts/check-release.js",
+    "check:syntax": "node scripts/check-syntax.js",
+    "test": "node --test",
+    "prepublishOnly": "npm run check"
   },
   "engines": {
     "node": ">=18"

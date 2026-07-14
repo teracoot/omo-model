@@ -1,0 +1,39 @@
+name: Release artifact
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  windows-quality:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check
+
+  artifact:
+    needs: windows-quality
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check
+      - run: npm run check:release -- "${GITHUB_REF_NAME}"
+      - run: mkdir dist && npm pack --pack-destination dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: omo-model-${{ github.ref_name }}
+          path: dist/*.tgz
+          if-no-files-found: error
+          retention-days: 30
