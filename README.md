@@ -1,8 +1,8 @@
 # omo-model
 
-`omo-model` is a small command line tool for switching an existing OhMyOpenAgent / Oh My OpenCode installation between numbered model-routing profiles.
+`omo-model` is a small command line tool for switching an existing OpenCode and OhMyOpenAgent / Oh My OpenCode installation between numbered model-routing profiles.
 
-It is designed for agent operators who already have OpenCode and OhMyOpenAgent installed. It edits the active config under `~/.config/opencode`, updates every OhMy agent and category to the selected model route, writes matching background concurrency settings, creates a timestamped backup, and tells the user to start a new OpenCode session so the route reloads.
+It is designed for agent operators who already have OpenCode and OhMyOpenAgent installed. It edits the active configs under `~/.config/opencode`, updates OpenCode defaults and existing base-agent overrides, updates every OhMy agent and category, writes matching background concurrency settings, and creates timestamped backups. Existing OpenCode processes retain their loaded routes; a newly started process reads the selected profile from disk.
 
 This README is intentionally explicit. Some agents installing this for a user will be older models with weak memory and weak config instincts. Follow the steps literally.
 
@@ -18,6 +18,9 @@ This README is intentionally explicit. Some agents installing this for a user wi
 
 It updates:
 
+- OpenCode `model` and `small_model`
+- existing OpenCode base-agent routing overrides
+- canonical provider and model display names supplied by the selected profile
 - every entry under `agents`
 - every entry under `categories`
 - `background_task.providerConcurrency`
@@ -470,10 +473,10 @@ Reference only. Do not run any command in this table before route-selection and 
 ```text
 omo-model --list           Show current route and numbered profiles
 omo-model -l               Same as --list
-omo-model --current        Show current route only
+omo-model --current        Show merged OpenCode and OhMy routing state
 omo-model -c               Same as --current
 omo-model --routes         Show configured OpenCode provider/model routes
-omo-model --use <number>   Switch all OhMy agents/categories to profile number
+omo-model --use <number>   Switch OpenCode and OhMy routing to profile number
 omo-model -u <number>      Same as --use
 omo-model --help           Show help
 ```
@@ -489,14 +492,21 @@ Profile numbers are always sequential `0..N-1` in list order. Both the installed
 | `2` | `TSNUI GPT-5.6 Sol High` | `ai.tsnui.com/gpt-5.6-sol` | `high` |
 | `3` | `TSNUI GPT-5.6 Sol XHigh` | `ai.tsnui.com/gpt-5.6-sol` | `xhigh` |
 | `4` | `TSNUI GPT-5.6 Sol Max` | `ai.tsnui.com/gpt-5.6-sol` | `max` |
-| `5` | `PQAPI GPT-5.6 Terra Max` | `www.pqapi.space/gpt-5.6-terra` | `max` |
-| `6` | `PQAPI GPT-5.6 Sol Max` | `www.pqapi.space/gpt-5.6-sol` | `max` |
-| `7` | `PQAPI GPT-5.5 XHigh` | `www.pqapi.space/gpt-5.5` | `xhigh` |
-| `8` | `Claude Free` | `claude-free/claude-free` | `max` |
-| `9` | `Free ChatGPT` | `gpt-free/gpt-5.6-sol` | `max` |
-| `10` | `Grok 4.5 High` | `grok:oracle:sub2api/grok-4.5` | `high` |
+| `5` | `GPT-5.6 Terra Max (PQAPI)` | `www.pqapi.space/gpt-5.6-terra` | `max` |
+| `6` | `GPT-5.6 Sol Max (PQAPI)` | `www.pqapi.space/gpt-5.6-sol` | `max` |
+| `7` | `GPT-5.5 XHigh (PQAPI)` | `www.pqapi.space/gpt-5.5` | `xhigh` |
+| `8` | `GPT-5.6 Terra Max (PQAPI(sub2api))` | `pqapi:sub2api/gpt-5.6-terra` | `max` |
+| `9` | `GPT-5.6 Sol Max (PQAPI(sub2api))` | `pqapi:sub2api/gpt-5.6-sol` | `max` |
+| `10` | `GPT-5.5 XHigh (PQAPI(sub2api))` | `pqapi:sub2api/gpt-5.5` | `xhigh` |
+| `11` | `Claude Free` | `claude-free/claude-free` | `max` |
+| `12` | `Free ChatGPT` | `gpt-free/gpt-5.6-sol` | `max` |
+| `13` | `Grok 4.5 High` | `grok:oracle:sub2api/grok-4.5` | `high` |
 
 Grok defaults to `reasoningEffort: "high"` (not `max`). OpenCode limits for Grok 4.5 are context `500000`, input `500000`, output `128000`, with image attachment enabled.
+
+The three `PQAPI(sub2api)` profiles mirror the corresponding `PQAPI` model definitions and credentials. Their provider route is `pqapi:sub2api`, and the mirrored provider uses `http://165.1.67.142/pqapi/v1/` as its only endpoint override.
+
+Switching while OpenCode is running is supported. The selector warns with the detected process IDs, but it does not close, restart, or modify those processes; existing processes and sessions keep their loaded routes. A newly started OpenCode process reads the selected profile. The selector backs up both the precedence-selected OpenCode base config and the OhMy config, updates top-level defaults, existing base-agent routing overrides, selected provider/model display names, OhMy agents/categories, and concurrency maps as one transaction, and restores both original files if a write fails. `omo-model --current` reports `<mixed>` when model, variant, or reasoning effort differs across those routing layers.
 
 ## Agent procedure
 
@@ -511,24 +521,28 @@ Agents should follow this exact sequence when a user asks to install or switch m
 7. If the desired profile list differs from the shipped default profiles, edit `bin/omo-model-profiles.js` in the local checkout, start from an empty or replaced `profiles` array, omit the cleanup profile unless duplicate plugin entries or stale plugin state are specifically present, and add no credentials, base URLs, or tokens.
 8. Validate the edited profile file with `node --check bin/omo-model-profiles.js` and, when OhMyOpenAgent exists in that OS account, `node ./bin/omo-model.js --list`.
 9. Link customized local profiles with `npm link` from the checkout. Use `npm install -g omo-model` or `npm install -g github:teracoot/omo-model` only when no profile customization is needed and the bundled profile list is sufficient.
-10. Run `omo-model --current` only after install/link or when `omo-model` is already available in the same OS environment, then report the active profile, model, variant, agent count, and category count.
+10. Run `omo-model --current` only after install/link or when `omo-model` is already available in the same OS environment, then report the active profile, model, variant, reasoning effort, agent count, and category count.
 11. Run `omo-model --list` and map the user's requested model/provider to a visible profile number.
 12. If the user gave a vague provider name, ask one precise question or choose only when the mapping is unambiguous from `--list`.
-13. Run `omo-model --use <number>`.
-14. Copy the backup path from the command output.
-15. Tell the user to start a new OpenCode session.
-16. After restart, verify with `omo-model --current`.
-17. If LSP or tool state matters, verify with `opencode debug lsp diagnostics <source-file> --print-logs --log-level INFO`.
+13. Run `omo-model --use <number>`. If OpenCode processes are running, report the advisory warning and clarify that those processes keep their loaded routes while newly started processes use the selected profile.
+14. Copy both the OpenCode and OhMy backup paths from the command output.
+15. Tell the user to start a new OpenCode process and session when they want to use the selected profile; existing processes and sessions remain on their previously loaded routes.
+16. Do not resume a pre-switch subagent `task_id`; continuation sessions intentionally preserve their original model assignment. Start a new delegated task instead.
+17. After restart, verify the model, variant, and reasoning effort with `omo-model --current`.
+18. If LSP or tool state matters, verify with `opencode debug lsp diagnostics <source-file> --print-logs --log-level INFO`.
 
 ## Required user-facing output after a switch
 
 After a successful switch, tell the user:
 
 ```text
-Switched OhMyOpenAgent to profile [N] <name>.
-Backup written to: <backup path>
-Start a new OpenCode session so OhMy reloads the model route.
-After restart, run `omo-model --current` to confirm the active model and variant.
+Switched OpenCode and OhMy routing to profile [N] <name>.
+OpenCode backup written to: <base backup path>
+OhMy backup written to: <OhMy backup path>
+Existing OpenCode processes and sessions keep their loaded routing.
+Start a new OpenCode process and session to use the selected profile.
+Do not resume a pre-switch subagent task_id; start a new delegated task.
+After restart, run `omo-model --current` to confirm the active model, variant, and reasoning effort.
 ```
 
 If the user prompted in Chinese, output the user-facing explanation in Chinese. A ready-to-copy Chinese and English message template is in [AGENT_USER_MESSAGE_TEMPLATE.md](./AGENT_USER_MESSAGE_TEMPLATE.md).
@@ -545,9 +559,13 @@ Then restart OpenCode and rerun the current-profile smoke check in the same OS e
 
 The selected profile exists, but the user's active OpenCode config does not contain that provider/model. Do not add fake providers. Configure the provider through the OhMy/OpenCode install flow or manually add a real provider entry first.
 
-### The switch worked but OpenCode still uses the old route
+### `Warning: OpenCode is running (PID...)`
 
-The current OpenCode session has the old plugin config in memory. Start a new OpenCode session.
+This is advisory, not a failed switch. The listed processes keep their already-loaded routing, the config switch continues, and newly started OpenCode processes use the selected profile. The selector never kills or restarts user processes automatically.
+
+### A resumed task still uses the old route
+
+A session or delegated task created before the switch keeps its stored provider/model assignment, and continuing it by `task_id` deliberately reuses that assignment. Start a new OpenCode process/session and create a new delegated task instead of resuming the old one.
 
 ### Windows and WSL disagree
 
@@ -558,6 +576,7 @@ You changed the wrong config. Run `omo-model` in the same OS environment where O
 - Do not print API keys or provider tokens.
 - Do not edit provider credentials unless the user explicitly asks.
 - The bundled profile list has no cleanup/disable-plugin entry. Do not invent one unless the user explicitly needs duplicate OMO plugin cleanup.
-- Always report the backup path.
-- Always remind the user to restart OpenCode after switching.
+- Never kill or restart OpenCode automatically. Active processes are allowed and keep their loaded routes.
+- Always report both backup paths.
+- Always explain that existing processes/sessions stay on their loaded routes, and that a new process/session uses the selected profile. Avoid resuming pre-switch task IDs when the new route is required.
 - Use Chinese user-facing output when the user's prompt is in Chinese.

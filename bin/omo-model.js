@@ -7,29 +7,30 @@ import {
   OPENCODE_CONFIG_CANDIDATES,
   backupConfig,
   configDirFor,
-  ensureRecord,
   isRecord,
   readConfig,
-  recordValues,
   resolveConfig,
   writeConfig,
+  writeConfigTransaction,
 } from "./omo-model-config.js";
+import { warnIfOpenCodeRunning } from "./omo-model-processes.js";
 import { profiles } from "./omo-model-profiles.js";
+import { applyProfileToRouting, assertProfileApplied, summarizeRouting } from "./omo-model-routing.js";
 
 const home = process.env.HOME || homedir();
 const configDir = configDirFor(home);
 const backupDir = join(configDir, "profile-backups");
 
 function usage() {
-  console.log(`omo-model - switch OhMyOpenAgent model routing profiles
+  console.log(`omo-model - switch OpenCode and OhMy model routing profiles
 
 Usage:
   omo-model --list           Show current route and numbered profiles
   omo-model -l               Same as --list
-  omo-model --current        Show current route only
+  omo-model --current        Show merged OpenCode and OhMy routing state
   omo-model -c               Same as --current
   omo-model --routes         Show configured OpenCode provider/model routes
-  omo-model --use <number>   Switch all OhMy agents/categories to profile number
+  omo-model --use <number>   Switch OpenCode and OhMy routing to profile number
   omo-model -u <number>      Same as --use
   omo-model --help           Show help
 
@@ -38,47 +39,35 @@ Examples:
   omo-model --use 0
   omo-model -u 3
 
-Note: start a new OpenCode session after switching so OhMy reloads the config.`);
+Note: switching while OpenCode is running is supported. Existing processes and sessions keep their loaded routing; start a new OpenCode process to use the selected profile.`);
 }
 
-function profileIndexFor(model, variant) {
-  const index = profiles.findIndex((profile) => profile.model === model && profile.variant === variant);
+function profileIndexFor(model, variant, effort) {
+  const index = profiles.findIndex(
+    (profile) => profile.model === model && profile.variant === variant && (profile.reasoningEffort ?? "<unset>") === effort,
+  );
   return index >= 0 ? index : null;
 }
 
-function unique(items) {
-  return [...new Set(items.filter((item) => item !== undefined && item !== null))].sort();
-}
-
 function currentSummary() {
+  const base = readConfig(resolveBaseConfig());
   const cfg = readConfig(resolveOhMyConfig());
-  const agents = recordValues(cfg.agents);
-  const categories = recordValues(cfg.categories);
-  const agentModels = unique(agents.map((item) => item.model));
-  const agentVariants = unique(agents.map((item) => item.variant));
-  const categoryModels = unique(categories.map((item) => item.model));
-  const categoryVariants = unique(categories.map((item) => item.variant));
-  const allModels = unique([...agentModels, ...categoryModels]);
-  const allVariants = unique([...agentVariants, ...categoryVariants]);
-  const model = allModels.length === 1 ? allModels[0] : allModels.length === 0 ? "<unset>" : "<mixed>";
-  const variant = allVariants.length === 1 ? allVariants[0] : allVariants.length === 0 ? "<unset>" : "<mixed>";
+  const summary = summarizeRouting(base, cfg);
 
   return {
-    model,
-    variant,
-    profileIndex: profileIndexFor(model, variant),
-    agentCount: agents.length,
-    categoryCount: categories.length,
+    ...summary,
+    profileIndex: profileIndexFor(summary.model, summary.variant, summary.effort),
   };
 }
 
 function showCurrent() {
   const summary = currentSummary();
-  console.log("Current OhMy route:");
+  console.log("Current routing state:");
   if (summary.profileIndex !== null) console.log(`  [${summary.profileIndex}] ${profiles[summary.profileIndex].name}`);
   else console.log("  [custom/mixed]");
   console.log(`  model:   ${summary.model}`);
   console.log(`  variant: ${summary.variant}`);
+  console.log(`  effort:  ${summary.effort}`);
   console.log(`  agents:  ${summary.agentCount}`);
   console.log(`  categories: ${summary.categoryCount}`);
 }
@@ -143,6 +132,7 @@ function switchProfile(index) {
   }
 
   const profile = profiles[index];
+  warnIfOpenCodeRunning();
 
   if (profile.disableOhMyPlugin) {
     const { path: baseConfigPath, removeAllOmo } = resolveBaseCleanupConfig();
@@ -167,35 +157,21 @@ function switchProfile(index) {
   if (!isRecord(cfg.agents)) throw new Error(`OhMy config has no 'agents' object: ${configPath}`);
   if (!isRecord(cfg.categories)) throw new Error(`OhMy config has no 'categories' object: ${configPath}`);
 
-  ensureRecord(cfg, "background_task");
-  const backupPath = backupConfig(configPath, backupDir, "oh-my-openagent");
+  applyProfileToRouting(base, cfg, profile);
+  assertProfileApplied(base, cfg, profile);
+  const baseBackupPath = backupConfig(baseConfigPath, backupDir, "opencode");
+  const ohMyBackupPath = backupConfig(configPath, backupDir, "oh-my-openagent");
+  writeConfigTransaction([
+    { file: baseConfigPath, value: base },
+    { file: configPath, value: cfg },
+  ]);
 
-  for (const target of [...Object.values(cfg.agents), ...Object.values(cfg.categories)]) {
-    if (!isRecord(target)) throw new Error("OhMy agents/categories must contain objects");
-    target.model = profile.model;
-    target.variant = profile.variant;
-    if (profile.reasoningEffort === null || profile.reasoningEffort === undefined) delete target.reasoningEffort;
-    else target.reasoningEffort = profile.reasoningEffort;
-  }
-
-  cfg.background_task.providerConcurrency = { [profile.providerConcurrency]: 5 };
-  cfg.background_task.modelConcurrency = { [profile.modelConcurrency]: 5 };
-
-  writeConfig(configPath, cfg);
-
-  const verify = readConfig(configPath);
-  for (const [name, target] of Object.entries(verify.agents || {})) {
-    if (target.model !== profile.model || target.variant !== profile.variant) throw new Error(`Verification failed for agent '${name}'`);
-  }
-  for (const [name, target] of Object.entries(verify.categories || {})) {
-    if (target.model !== profile.model || target.variant !== profile.variant) throw new Error(`Verification failed for category '${name}'`);
-  }
-
-  console.log(`Switched OhMy route to [${index}] ${profile.name}`);
+  console.log(`Switched OpenCode and OhMy routing to [${index}] ${profile.name}`);
   console.log(`  model:   ${profile.model}`);
   console.log(`  variant: ${profile.variant}`);
-  console.log(`Backup: ${backupPath}`);
-  console.log("Start a new OpenCode session so OhMy reloads this config.");
+  console.log(`OpenCode backup: ${baseBackupPath}`);
+  console.log(`OhMy backup: ${ohMyBackupPath}`);
+  console.log("Existing OpenCode processes and sessions keep their loaded routing. Start a new OpenCode process to use this profile.");
 }
 
 function resolveOhMyConfig() {

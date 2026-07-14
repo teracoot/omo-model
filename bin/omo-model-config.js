@@ -35,6 +35,16 @@ export function writeConfig(file, value) {
   writeFileSync(file, `${JSON.stringify(value, null, 2)}\n`, "utf8");
 }
 
+export function writeConfigTransaction(entries) {
+  const originals = entries.map(({ file }) => ({ file, data: readFileSync(file) }));
+  try {
+    for (const { file, value } of entries) writeConfig(file, value);
+  } catch (error) {
+    for (const { file, data } of originals) writeFileSync(file, data);
+    throw error;
+  }
+}
+
 export function backupConfig(file, backupDir, label) {
   mkdirSync(backupDir, { recursive: true });
   const safeLabel = sanitizeLabel(label);

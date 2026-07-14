@@ -22,7 +22,7 @@ Use this block only when route-selection has already been handled, the OpenCode 
 
 If this task includes installing, detecting, or configuring profiles, I must first ask which existing OpenCode provider/model routes you want as `omo-model` profiles before I run any install, detection, or config command. If you do not choose a subset, I will detect and use every configured provider/model route.
 
-I will switch your OhMyOpenAgent model route with `omo-model`.
+I will switch your OpenCode and OhMy model routing with `omo-model`.
 
 First I need to confirm which OpenCode environment you are using:
 
@@ -38,7 +38,7 @@ Then I will switch to the profile you choose with:
 
 `omo-model --use <number>`
 
-After the switch, you must start a new OpenCode session because existing sessions keep the old plugin config in memory.
+You may keep existing OpenCode processes running. The selector warns about them but continues switching the on-disk configs. Existing processes and sessions keep their loaded routing; start a new OpenCode process and session to use the selected profile. Do not resume a pre-switch subagent `task_id` when you need the new route, because continuation sessions preserve their original model assignment.
 ```
 
 ## English: install interview
@@ -72,16 +72,20 @@ I did not print API keys or base URLs. If you already requested a subset, I will
 ## English: after successful switch
 
 ```text
-Switched OhMyOpenAgent to profile [N] <profile name>.
+Switched OpenCode and OhMy routing to profile [N] <profile name>.
 
 New route:
 - model: <model>
 - variant: <variant>
+- reasoning effort: <effort>
 
-Backup written to:
-<backup path>
+OpenCode backup written to:
+<base backup path>
 
-Start a new OpenCode session so OhMy reloads the model route. After restart, run:
+OhMy backup written to:
+<OhMy backup path>
+
+Existing OpenCode processes and sessions keep their loaded routing. Start a new OpenCode process and session to use the selected profile. Do not resume a pre-switch subagent `task_id` when you need the new route; start a new delegated task. In the new process, run:
 
 `omo-model --current`
 
@@ -127,7 +131,7 @@ STOP: 不要把这一段用于安装、检测、设置状态检查或自定义 p
 
 如果这个任务包含安装、检测或配置 profile，我必须先询问你想把哪些现有 OpenCode provider/model 路由加入为 `omo-model` profile，然后才能运行任何安装、检测或配置命令。如果你不指定子集，我会检测并使用所有已经配置好的 provider/model 路由。
 
-我会用 `omo-model` 帮你切换 OhMyOpenAgent 的模型路由。
+我会用 `omo-model` 帮你切换 OpenCode 与 OhMy 的模型路由。
 
 我会先确认你正在使用哪个 OpenCode 环境：
 
@@ -143,7 +147,7 @@ STOP: 不要把这一段用于安装、检测、设置状态检查或自定义 p
 
 `omo-model --use <number>`
 
-切换完成后，你需要重新开启一个 OpenCode 会话，因为已经打开的会话仍然会使用旧的插件配置。
+你可以保留现有 OpenCode 进程。选择器会显示警告，但仍会继续切换磁盘上的配置。现有进程和会话继续使用已经加载的路由；如需使用新选择的 profile，请启动新的 OpenCode 进程和会话。需要新路由时，不要继续使用切换前的子代理 `task_id`，因为续接会话会保留原来的模型分配。
 ```
 
 ## Chinese: install interview
@@ -177,16 +181,20 @@ STOP: 不要把这一段用于安装、检测、设置状态检查或自定义 p
 ## Chinese: after successful switch
 
 ```text
-已将 OhMyOpenAgent 切换到 profile [N] <profile name>。
+已将 OpenCode 与 OhMy 路由切换到 profile [N] <profile name>。
 
 新的路由：
 - model: <model>
 - variant: <variant>
+- reasoning effort: <effort>
 
-备份文件已写入：
-<backup path>
+OpenCode 备份文件已写入：
+<base backup path>
 
-请重新开启一个 OpenCode 会话，让 OhMy 重新加载模型路由。重启后可以运行：
+OhMy 备份文件已写入：
+<OhMy backup path>
+
+现有 OpenCode 进程和会话继续使用已经加载的路由。如需使用新选择的 profile，请启动新的 OpenCode 进程和会话。需要新路由时，不要继续使用切换前的子代理 `task_id`；请创建新的委派任务。在新进程中可以运行：
 
 `omo-model --current`
 
