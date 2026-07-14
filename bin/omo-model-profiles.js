@@ -50,6 +50,14 @@ export const profiles = [
     modelConcurrency: "www.pqapi.space/gpt-5.6-terra",
   },
   {
+    name: "PQAPI GPT-5.6 Sol Max",
+    model: "www.pqapi.space/gpt-5.6-sol",
+    variant: "max",
+    reasoningEffort: "max",
+    providerConcurrency: "www.pqapi.space",
+    modelConcurrency: "www.pqapi.space/gpt-5.6-sol",
+  },
+  {
     name: "PQAPI GPT-5.5 XHigh",
     model: "www.pqapi.space/gpt-5.5",
     variant: "xhigh",
@@ -65,6 +73,14 @@ export const profiles = [
     reasoningEffort: null,
     providerConcurrency: "claude-free",
     modelConcurrency: "claude-free/claude-free",
+  },
+  {
+    name: "Free ChatGPT",
+    model: "gpt-free/gpt-5.6-sol",
+    variant: "max",
+    reasoningEffort: "max",
+    providerConcurrency: "gpt-free",
+    modelConcurrency: "gpt-free/gpt-5.6-sol",
   },
   {
     name: "Grok 4.5 High",

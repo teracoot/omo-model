@@ -490,9 +490,11 @@ Profile numbers are always sequential `0..N-1` in list order. Both the installed
 | `3` | `TSNUI GPT-5.6 Sol XHigh` | `ai.tsnui.com/gpt-5.6-sol` | `xhigh` |
 | `4` | `TSNUI GPT-5.6 Sol Max` | `ai.tsnui.com/gpt-5.6-sol` | `max` |
 | `5` | `PQAPI GPT-5.6 Terra Max` | `www.pqapi.space/gpt-5.6-terra` | `max` |
-| `6` | `PQAPI GPT-5.5 XHigh` | `www.pqapi.space/gpt-5.5` | `xhigh` |
-| `7` | `Claude Free` | `claude-free/claude-free` | `max` |
-| `8` | `Grok 4.5 High` | `grok:oracle:sub2api/grok-4.5` | `high` |
+| `6` | `PQAPI GPT-5.6 Sol Max` | `www.pqapi.space/gpt-5.6-sol` | `max` |
+| `7` | `PQAPI GPT-5.5 XHigh` | `www.pqapi.space/gpt-5.5` | `xhigh` |
+| `8` | `Claude Free` | `claude-free/claude-free` | `max` |
+| `9` | `Free ChatGPT` | `gpt-free/gpt-5.6-sol` | `max` |
+| `10` | `Grok 4.5 High` | `grok:oracle:sub2api/grok-4.5` | `high` |
 
 Grok defaults to `reasoningEffort: "high"` (not `max`). OpenCode limits for Grok 4.5 are context `500000`, input `500000`, output `128000`, with image attachment enabled.
 
