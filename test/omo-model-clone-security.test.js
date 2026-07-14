@@ -6,7 +6,9 @@ import { createClone, extractClone, inspectClone } from "../bin/omo-model-clone-
 import { createZip, readZip } from "../bin/omo-model-pack-zip.js";
 import { makeCloneFixture, removeCloneFixture } from "./omo-model-clone-fixture.js";
 
-test("Given manifest tampering or an extra entry, inspect rejects the archive", () => {
+const windowsOnly = { skip: process.platform !== "win32" };
+
+test("Given manifest tampering or an extra entry, inspect rejects the archive", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
@@ -25,7 +27,7 @@ test("Given manifest tampering or an extra entry, inspect rejects the archive", 
   }
 });
 
-test("Given a legacy v1 manifest, inspect rejects it as unsupported", () => {
+test("Given a legacy v1 manifest, inspect rejects it as unsupported", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
@@ -55,7 +57,7 @@ test("Clone feature sources and assets contain no automatic helper commands", ()
   for (const forbidden of ["Copy-Item", "Move-Item", "Remove-Item", "Start-Process", "Get-Process", "validate-clone", "restore-windows"]) assert.equal(source.includes(forbidden), false, forbidden);
 });
 
-test("Given malformed clone metadata, inspect rejects exact schema count sorting and route violations", () => {
+test("Given malformed clone metadata, inspect rejects exact schema count sorting and route violations", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
@@ -80,7 +82,7 @@ test("Given malformed clone metadata, inspect rejects exact schema count sorting
   }
 });
 
-test("Given schema-valid metadata unrelated to payloads, inspect rejects semantic drift", () => {
+test("Given schema-valid metadata unrelated to payloads, inspect rejects semantic drift", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });

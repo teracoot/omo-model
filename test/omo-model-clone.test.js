@@ -6,7 +6,9 @@ import { createClone, extractClone, inspectClone } from "../bin/omo-model-clone-
 import { readZip } from "../bin/omo-model-pack-zip.js";
 import { makeCloneFixture, removeCloneFixture, SECRET } from "./omo-model-clone-fixture.js";
 
-test("Given a synthetic Windows home, create preserves exact raw payloads and only static root assets", () => {
+const windowsOnly = { skip: process.platform !== "win32" };
+
+test("Given a synthetic Windows home, create preserves exact raw payloads and only static root assets", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
@@ -28,7 +30,7 @@ test("Given a synthetic Windows home, create preserves exact raw payloads and on
   }
 });
 
-test("Given a v2 exact clone, inspect verifies a closed manifest and extract writes only a review tree", () => {
+test("Given a v2 exact clone, inspect verifies a closed manifest and extract writes only a review tree", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
@@ -46,7 +48,7 @@ test("Given a v2 exact clone, inspect verifies a closed manifest and extract wri
   }
 });
 
-test("Given protected roots, create and extract reject aliases and existing destinations", () => {
+test("Given protected roots, create and extract reject aliases and existing destinations", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });

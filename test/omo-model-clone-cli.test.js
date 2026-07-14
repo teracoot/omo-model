@@ -6,11 +6,13 @@ import { makeCloneFixture, removeCloneFixture, SECRET } from "./omo-model-clone-
 import { createClone } from "../bin/omo-model-clone-core.js";
 import { createZip, readZip } from "../bin/omo-model-pack-zip.js";
 
+const windowsOnly = { skip: process.platform !== "win32" };
+
 function run(args) {
   return spawnSync(process.execPath, ["bin/omo-model-clone.js", ...args], { cwd: new URL("..", import.meta.url), encoding: "utf8" });
 }
 
-test("Given exact acknowledgement flags, CLI creates inspects and extracts without leaking sensitive metadata", () => {
+test("Given exact acknowledgement flags, CLI creates inspects and extracts without leaking sensitive metadata", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     const create = run(["create", "--home", fixture.home, "--output", fixture.archive, "--include-secrets", "--unencrypted"]);
@@ -46,7 +48,7 @@ test("Given either help spelling, CLI exits successfully before filesystem acces
   }
 });
 
-test("Given internal archive and path failures, CLI stderr reveals no sensitive context", () => {
+test("Given internal archive and path failures, CLI stderr reveals no sensitive context", windowsOnly, () => {
   const fixture = makeCloneFixture();
   try {
     createClone({ home: fixture.home, output: fixture.archive });
