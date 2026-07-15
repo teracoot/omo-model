@@ -29,6 +29,7 @@ const requiredPaths = [
   "LICENSE",
   "README.md",
   "RELEASING.md",
+  "UPGRADE.md",
   "bin/omo-model.cmd",
   "bin/omo-model.js",
   "bin/omo-model.ps1",

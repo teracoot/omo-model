@@ -1,6 +1,6 @@
 {
   "name": "omo-model",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Switch OpenCode and OhMy model routes and create redacted or exact configuration packs.",
   "type": "module",
   "bin": {
@@ -11,6 +11,7 @@
   "files": [
     "bin",
     "README.md",
+    "UPGRADE.md",
     "CHANGELOG.md",
     "RELEASING.md",
     "AGENT_USER_MESSAGE_TEMPLATE.md",
@@ -20,6 +21,7 @@
   "scripts": {
     "check": "npm run check:syntax && npm test && npm run check:package && npm run check:release",
     "check:package": "node scripts/check-package.js",
+    "check:local-release": "node scripts/check-local-release.js",
     "check:release": "node scripts/check-release.js",
     "check:syntax": "node scripts/check-syntax.js",
     "test": "node --test",

@@ -4,9 +4,17 @@ All notable changes to `omo-model` are documented here. This project follows [Se
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-07-15
+
 ### Added
 
 - A `PQAPI(sub2api)` provider mirror and three matching `omo-model` profiles for Terra Max, Sol Max, and GPT-5.5 XHigh.
+- An AI-agent upgrade entry point and guarded migration procedure for every prior GitHub installation shape, including the original Node checkout, GitHub-global installs, customized linked checkouts, and standalone Windows launchers.
+- A mandatory local release gate that switches every profile and starts a fresh installed OpenCode server after each switch.
+
+### Fixed
+
+- TSNUI profile switches no longer serialize an invalid `null` provider display name under stricter OpenCode schema validation.
 
 ## [1.1.0] - 2026-07-14
 
