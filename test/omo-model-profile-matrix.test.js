@@ -12,6 +12,12 @@ const expectedPqapiProfiles = new Map([
   ["www.pqapi.space/gpt-5.5", "GPT-5.5 XHigh (PQAPI)"],
 ]);
 
+test("profiles never encode null provider display names", () => {
+  for (const profile of profiles) {
+    if (Object.hasOwn(profile, "providerName")) assert.equal(typeof profile.providerName, "string", profile.name);
+  }
+});
+
 test("PQAPI profiles use model-first labels and a neutral provider display name", () => {
   for (const profile of profiles.filter(({ model }) => model.startsWith("www.pqapi.space/"))) {
     assert.equal(profile.name, expectedPqapiProfiles.get(profile.model));
@@ -57,7 +63,8 @@ for (const [index, profile] of profiles.entries()) {
       const modelId = profile.model.slice(separator + 1);
       assert.equal(base.model, profile.model);
       assert.equal(base.small_model, profile.model);
-      assert.equal(base.provider[providerId].name, profile.providerName);
+      const expectedProviderName = Object.hasOwn(profile, "providerName") ? profile.providerName : `stale-${providerId}`;
+      assert.equal(base.provider[providerId].name, expectedProviderName);
       assert.equal(base.provider[providerId].models[modelId].name, profile.modelName);
       assert.equal(base.agent.build.model, profile.model);
       assert.equal(base.agent.build.variant, profile.variant);

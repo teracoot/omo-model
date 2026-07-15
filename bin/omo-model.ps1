@@ -19,7 +19,6 @@ $Profiles = @(
   [ordered]@{
     Name = 'TSNUI GPT-5.5 xhigh'
     Model = 'ai.tsnui.com/gpt-5.5'
-    ProviderName = $null
     ModelName = 'GPT-5.5 (TSNUI)'
     Variant = 'xhigh'
     ReasoningEffort = 'xhigh'
@@ -29,7 +28,6 @@ $Profiles = @(
   [ordered]@{
     Name = 'TSNUI GPT-5.6 Sol Medium'
     Model = 'ai.tsnui.com/gpt-5.6-sol'
-    ProviderName = $null
     ModelName = 'GPT-5.6 Sol (TSNUI)'
     Variant = 'medium'
     ReasoningEffort = 'medium'
@@ -39,7 +37,6 @@ $Profiles = @(
   [ordered]@{
     Name = 'TSNUI GPT-5.6 Sol High'
     Model = 'ai.tsnui.com/gpt-5.6-sol'
-    ProviderName = $null
     ModelName = 'GPT-5.6 Sol (TSNUI)'
     Variant = 'high'
     ReasoningEffort = 'high'
@@ -49,7 +46,6 @@ $Profiles = @(
   [ordered]@{
     Name = 'TSNUI GPT-5.6 Sol XHigh'
     Model = 'ai.tsnui.com/gpt-5.6-sol'
-    ProviderName = $null
     ModelName = 'GPT-5.6 Sol (TSNUI)'
     Variant = 'xhigh'
     ReasoningEffort = 'xhigh'
@@ -59,7 +55,6 @@ $Profiles = @(
   [ordered]@{
     Name = 'TSNUI GPT-5.6 Sol Max'
     Model = 'ai.tsnui.com/gpt-5.6-sol'
-    ProviderName = $null
     ModelName = 'GPT-5.6 Sol (TSNUI)'
     Variant = 'max'
     ReasoningEffort = 'max'
@@ -486,7 +481,12 @@ function Switch-Profile([int]$Id) {
   if (-not $base.provider.$providerId.models.$modelId) {
     throw "Target model '$($profile.Model)' is not configured in opencode config: $baseConfigPath"
   }
-  Set-JsonProperty $base.provider.$providerId 'name' $profile.ProviderName
+  if ($profile.Contains('ProviderName')) {
+    if ($profile.ProviderName -isnot [string]) {
+      throw "Invalid provider display name for profile '$($profile.Name)'"
+    }
+    Set-JsonProperty $base.provider.$providerId 'name' $profile.ProviderName
+  }
   Set-JsonProperty $base.provider.$providerId.models.$modelId 'name' $profile.ModelName
   if (-not ($cfg.PSObject.Properties.Name -contains 'agents') -or $null -eq $cfg.agents) {
     throw "OhMy config has no 'agents' object: $configPath"
@@ -569,7 +569,7 @@ function Switch-Profile([int]$Id) {
   if ($routing.Model -ne $profile.Model -or $routing.Variant -ne $profile.Variant -or $routing.Effort -ne $expectedEffort) {
     throw "Routing verification failed for profile '$($profile.Name)'"
   }
-  if ($base.provider.$providerId.name -ne $profile.ProviderName) {
+  if ($profile.Contains('ProviderName') -and $base.provider.$providerId.name -ne $profile.ProviderName) {
     throw "Provider display-name verification failed for profile '$($profile.Name)'"
   }
   if ($base.provider.$providerId.models.$modelId.name -ne $profile.ModelName) {

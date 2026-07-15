@@ -3,7 +3,6 @@ export const profiles = [
   {
     name: "TSNUI GPT-5.5 xhigh",
     model: "ai.tsnui.com/gpt-5.5",
-    providerName: null,
     modelName: "GPT-5.5 (TSNUI)",
     variant: "xhigh",
     reasoningEffort: "xhigh",
@@ -13,7 +12,6 @@ export const profiles = [
   {
     name: "TSNUI GPT-5.6 Sol Medium",
     model: "ai.tsnui.com/gpt-5.6-sol",
-    providerName: null,
     modelName: "GPT-5.6 Sol (TSNUI)",
     variant: "medium",
     reasoningEffort: "medium",
@@ -23,7 +21,6 @@ export const profiles = [
   {
     name: "TSNUI GPT-5.6 Sol High",
     model: "ai.tsnui.com/gpt-5.6-sol",
-    providerName: null,
     modelName: "GPT-5.6 Sol (TSNUI)",
     variant: "high",
     reasoningEffort: "high",
@@ -33,7 +30,6 @@ export const profiles = [
   {
     name: "TSNUI GPT-5.6 Sol XHigh",
     model: "ai.tsnui.com/gpt-5.6-sol",
-    providerName: null,
     modelName: "GPT-5.6 Sol (TSNUI)",
     variant: "xhigh",
     reasoningEffort: "xhigh",
@@ -43,7 +39,6 @@ export const profiles = [
   {
     name: "TSNUI GPT-5.6 Sol Max",
     model: "ai.tsnui.com/gpt-5.6-sol",
-    providerName: null,
     modelName: "GPT-5.6 Sol (TSNUI)",
     variant: "max",
     reasoningEffort: "max",

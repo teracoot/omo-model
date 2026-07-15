@@ -30,7 +30,8 @@ test("PowerShell selector hot-swaps every canonical profile when OpenCode is run
       const modelId = profile.model.slice(separator + 1);
       assert.equal(base.model, profile.model);
       assert.equal(base.small_model, profile.model);
-      assert.equal(base.provider[providerId].name, profile.providerName);
+      const expectedProviderName = Object.hasOwn(profile, "providerName") ? profile.providerName : `stale-${providerId}`;
+      assert.equal(base.provider[providerId].name, expectedProviderName);
       assert.equal(base.provider[providerId].models[modelId].name, profile.modelName);
       assert.equal(base.agent.build.model, profile.model);
       assert.equal(base.agent.build.variant, profile.variant);

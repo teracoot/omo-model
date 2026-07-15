@@ -31,11 +31,16 @@ export function summarizeRouting(base, ohMy) {
 }
 
 export function applyProfileToRouting(base, ohMy, profile) {
+  const { model, provider } = routeForProfile(base, profile);
+  const hasProviderName = Object.hasOwn(profile, "providerName");
+  const hasModelName = Object.hasOwn(profile, "modelName");
+  if (hasProviderName && typeof profile.providerName !== "string") throw new Error(`Invalid provider display name for profile '${profile.name}'`);
+  if (hasModelName && typeof profile.modelName !== "string") throw new Error(`Invalid model display name for profile '${profile.name}'`);
+
   base.model = profile.model;
   base.small_model = profile.model;
-  const { model, provider } = routeForProfile(base, profile);
-  if (Object.hasOwn(profile, "providerName")) provider.name = profile.providerName;
-  if (Object.hasOwn(profile, "modelName")) model.name = profile.modelName;
+  if (hasProviderName) provider.name = profile.providerName;
+  if (hasModelName) model.name = profile.modelName;
   for (const target of recordValues(base.agent)) {
     if (!isRecord(target)) continue;
     const hasModel = typeof target.model === "string";
